@@ -6,6 +6,7 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 import { useNavigate, useParams } from "react-router-dom";
 import IngredientCard from "../recipes/ingredient-card";
+import Select from 'react-select';  // Import react-select
 
 function Entry() {
     const { idRecipe } = useParams();
@@ -15,7 +16,7 @@ function Entry() {
     const [name, setName] = useState("");
     const [description, setDescription] = useState(() => EditorState.createEmpty());
     const [isPublic, setIsPublic] = useState(true);
-    const [initialIngredientList, setinItialIngredientList] = useState([]);
+    const [initialIngredientList, setInitialIngredientList] = useState([]);
     const [selectedIngredients, setSelectedIngredients] = useState([]);
     const [ingredientList, setIngredientList] = useState([]);
     const [isApproved, setIsApproved] = useState(false);
@@ -25,8 +26,6 @@ function Entry() {
     const [canEdit, setCanEdit] = useState(false);
     const [loadingPost, setLoadingPost] = useState(false);
     const [recipeNameList, setRecipeNameList] = useState([]);
-
-
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -40,19 +39,23 @@ function Entry() {
             fetchIngredientList();
             fetchCurrentAccount();
             fetchRecipeNames()
-            setCanEdit(currentUserAccount && currentUserAccount.idAccount === idAccountPost && !isApproved && !isFinished)
-
         } catch (er) { console.log(er) }
     }, []);
 
+    useEffect(() => {
+        if (currentUserAccount && idAccountPost !== null) {
+            setCanEdit(currentUserAccount.idAccount === idAccountPost && !isApproved && !isFinished);
+        }
+    }, [currentUserAccount, idAccountPost, isApproved, isFinished]);
+
     const fetchCurrentAccount = async () => {
         try {
-            const response = await axios.get(`http://localhost:5231/api/Account/${tokenInfor.email}`)
+            const response = await axios.get(`http://localhost:5231/api/Account/${tokenInfor.email}`);
             if (response) {
-                setCurrentUserAccount(response.data)
+                setCurrentUserAccount(response.data);
             }
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
     }
 
@@ -95,7 +98,7 @@ function Entry() {
                 "unit": item.ingredient.unit.trim(),
                 "recipeIngredients": null
             }));
-            setinItialIngredientList(formattedIngredients);
+            setInitialIngredientList(formattedIngredients);
             setSelectedIngredients(formattedIngredients);
             setLoading(false);
         } catch (err) {
@@ -128,9 +131,9 @@ function Entry() {
 
     const fetchRecipeNames = async () => {
         try {
-            const response = await axios.get("http://localhost:5231/api/Recipe/getAllRecipeNames")
-            setRecipeNameList(response.data.$values)
-        } catch (err) { console.log(err) }
+            const response = await axios.get("http://localhost:5231/api/Recipe/getAllRecipeNames");
+            setRecipeNameList(response.data.$values);
+        } catch (err) { console.log(err); }
     }
 
     const validate = () => {
@@ -138,17 +141,16 @@ function Entry() {
         try {
             if (name.trim() !== recipeNameList.find(recipe => recipe === name.trim())) {
                 if (!name.trim()) errors.name = "Name is required.";
-                if (recipeNameList.includes(name.trim())) errors.name = "This name has already taken.";
+                if (recipeNameList.includes(name.trim())) errors.name = "This name has already been taken.";
             }
             if (!description.getCurrentContent().hasText()) errors.description = "Description is required.";
             const missingQuantities = selectedIngredients.filter(item => !item.quantity || item.quantity <= 0);
             if (missingQuantities.length > 0) {
                 errors.ingredients = `Please enter a quantity for: ${missingQuantities.map(item => item.name).join(", ")}`;
             }
-        } catch (err) { console.log(err) }
+        } catch (err) { console.log(err); }
         return errors;
     };
-
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -171,7 +173,6 @@ function Entry() {
 
             setLoadingPost(true);
 
-
             const descriptionText = description.getCurrentContent().getPlainText();
             await axios.put(`http://localhost:5231/api/Recipe/updateRecipe/${idRecipe}`, {
                 name,
@@ -185,7 +186,7 @@ function Entry() {
                 }))
             });
 
-            Swal.fire({ icon: 'success', title: 'Recipe updated successfully!', timer: 1500 })
+            Swal.fire({ icon: 'success', title: 'Recipe updated successfully!', timer: 1500 });
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'Failed to update recipe', text: 'Please try again later.' });
         } finally {
@@ -222,8 +223,10 @@ function Entry() {
                 <div style={{ flex: 1, padding: "20px", display: "flex", flexDirection: "column" }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                         <label>Name:</label>
-                        {canEdit ? (<input type="text" value={name} onChange={(e) => setName(e.target.value)}
-                            style={{ width: "97%", padding: "8px", backgroundColor: "transparent" }} />) : (<p>{name}</p>)}
+                        {canEdit ? (
+                            <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+                                style={{ width: "97%", padding: "8px", backgroundColor: "transparent" }} />
+                        ) : (<p>{name}</p>)}
                     </div>
                     <br />
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -242,20 +245,20 @@ function Entry() {
                         </div>
                     </div>
                 </div>
+
                 <div style={{ flex: 1, padding: "20px" }}>
                     <label>Ingredients:</label>
                     {canEdit && (<div style={{ marginBottom: "10px" }}>
-                        <select
-                            onChange={(e) => handleIngredientSelect(e.target.value)}
-                            style={{ width: "100%", padding: "8px", backgroundColor: "transparent", marginTop: "10px" }}
-                        >
-                            <option value="">Select an ingredient</option>
-                            {ingredientList.map((ingredient, index) => (
-                                <option key={index} value={ingredient.name}>{ingredient.name}</option>
-                            ))}
-                        </select>
-                    </div>)}
-                    <div style={{ marginBottom: "10px" }}>
+                        <Select
+                            options={ingredientList.map(ingredient => ({
+                                value: ingredient.name,
+                                label: ingredient.name,
+                            }))}
+                            onChange={(selectedOption) => handleIngredientSelect(selectedOption.value)}
+                            placeholder="Select an ingredient"
+                            isSearchable={true}
+                        />
+                        <br />
                         {selectedIngredients.length > 0 ? (
                             <div className="ingredient-card-wrapper">
                                 {selectedIngredients.map((ingredient, index) => {
@@ -271,8 +274,8 @@ function Entry() {
                         ) : (
                             <p>No ingredients selected.</p>
                         )}
-                    </div>
-
+                    </div>)}
+                    <br />
                     {selectedIngredients.length > 0 && (
                         <div style={{ maxHeight: "355px", overflowY: "auto", border: "1px solid #ccc", marginTop: "10px" }}>
                             <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -311,14 +314,6 @@ function Entry() {
                             </table>
                         </div>
                     )}
-                    {console.log(canEdit)}
-                    <br />
-                    {canEdit && (<div>
-                        <button onClick={handleSave} className="add-recipe-submit-button" style={{
-                            width: "100%", border: "none", backgroundColor: "#ff7700", height: "30px"
-                        }}>Save</button>
-                        {loadingPost && <p style={{ color: "blue" }}>Saving contest, please wait...</p>}
-                    </div>)}
                 </div>
             </div>
         </div>

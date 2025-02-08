@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ContestEditForm from "./contest-edit";
@@ -10,6 +10,8 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { FaPlus } from "react-icons/fa";
 import AddContest from "../contest/add-contest";
+import { DataContext } from "../../context/DatabaseContext";
+
 
 function useThrottledResizeObserver(callback, delay = 200) {
     const resizeObserverRef = useRef(null);
@@ -24,7 +26,7 @@ function useThrottledResizeObserver(callback, delay = 200) {
         };
 
         const observer = new ResizeObserver(throttledCallbackRef.current);
-        const elementsToObserve = document.querySelectorAll('.contest-management-container'); // Adjust the selector
+        const elementsToObserve = document.querySelectorAll('.contest-management-container');
 
         elementsToObserve.forEach((element) => {
             observer.observe(element);
@@ -40,6 +42,7 @@ function useThrottledResizeObserver(callback, delay = 200) {
 }
 
 function ContestManagement() {
+    const { tokenInfor } = useContext(DataContext);
     const [contests, setContests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -47,6 +50,7 @@ function ContestManagement() {
     const [contestEdit, setContestEdit] = useState(false);
     const [addContest, setAddContest] = useState(false);
     const [idContest, setIdContest] = useState(0);
+    const [currentUserAccount, setCurrentUserAccount] = useState(null);
     const navigate = useNavigate()
 
     useThrottledResizeObserver(() => {
@@ -85,6 +89,17 @@ function ContestManagement() {
         }
     };
 
+    const fetchCurrentAccount = async () => {
+        try {
+            const response = await axios.get(`http://localhost:5231/api/Account/${tokenInfor.email}`)
+            if (response) {
+                setCurrentUserAccount(response.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     const fetchAttendeesCount = async (contestId) => {
         try {
             const response = await axios.get("http://localhost:5231/api/Contest/getAttendeesOfContest", {
@@ -103,14 +118,20 @@ function ContestManagement() {
     };
 
     useEffect(() => {
-        fetchContests();
+        try {
+            fetchContests();
+            fetchCurrentAccount()
+        } catch (err) { console.log(err) }
     }, []);
 
     useEffect(() => {
-        contests.forEach((contest) => {
-            fetchAttendeesCount(contest.idContest);
-        });
+        try {
+            contests.forEach((contest) => {
+                fetchAttendeesCount(contest.idContest);
+            });
+        } catch (err) { console.log(err) }
     }, [contests]);
+
     useEffect(() => {
         try {
             if (contests.length > 0) {
@@ -186,7 +207,10 @@ function ContestManagement() {
     };
 
     const navigateToEvaluation = (contestId) => {
-        navigate(`/contest/evaluation/${contestId}`)
+        try {
+            if (currentUserAccount.role === "SUPERADMIN")
+                navigate(`/contest/evaluation/${contestId}`)
+        } catch (err) { console.log(err) }
     }
 
     const navigateToSpecificContestPage = (contestId) => {
