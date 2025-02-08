@@ -17,7 +17,7 @@ function App() {
   const { tokenInfor } = useContext(DataContext);
   const location = useLocation();
 
-  const allowLinks = ["/", "/recipe", "/contest", "contest/:id", "/tips"]
+  const allowLinks = ["/", "/recipe", "/contest", "contest/:id", "/tips","/management"]
 
   const showContact = location.pathname === "/" || location.pathname.startsWith("/recipe");
   const showNavbarAndContact = allowLinks.some(path => {

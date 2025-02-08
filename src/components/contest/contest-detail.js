@@ -10,6 +10,7 @@ import { AiFillLike } from "react-icons/ai";
 
 function ContestDetail() {
     const { id } = useParams();
+
     const [comments, setComments] = useState([]);
     const [contest, setContest] = useState(null);
     const [description, setDescription] = useState("");
@@ -18,6 +19,8 @@ function ContestDetail() {
     const [likedComments, setLikedComments] = useState([]);
     const [userLogged, setUserLogged] = useState([]);
     const [userRecipe, setUserRecipe] = useState([]);
+    const [ingredientList, setIngredientList] = useState([]);
+
     const { tokenInfor } = useContext(DataContext);
 
 
@@ -30,13 +33,21 @@ function ContestDetail() {
             fetchAttendeesList()
             fetchUser()
             fetchUsersRecipe()
-            console.log(id + " " + userLogged.idAccount)
+            fetchIngredients()
         } else {
             console.error("Invalid contest ID.");
         }
     }, [id]);
 
-    const userEntry = entryList.find(entry => entry.account.idAccount === userLogged.idAccount);
+    console.log(userRecipe)
+
+    let userEntry, winnerEntry
+
+    try {
+        userEntry = entryList.find(entry => entry.account.idAccount === userLogged.idAccount);
+        winnerEntry = entryList.find(entry => entry.idAccountPost === contest.winner.idAccount);
+        if (winnerEntry) console.log(winnerEntry)
+    } catch (er) { console.log(er) }
 
     const fetchUser = async () => {
         try {
@@ -65,6 +76,13 @@ function ContestDetail() {
             });
         }
     };
+
+    const fetchIngredients = async () => {
+        try {
+            const response = await axios.get("http://localhost:5231/api/Recipe/getAllIngredientNames")
+            setIngredientList(response.data.$values)
+        } catch (err) { console.log(err) }
+    }
 
     const fetchContest = async () => {
         try {
@@ -136,8 +154,18 @@ function ContestDetail() {
     };
 
     const handleJoinCompetition = () => {
-        const link = location.pathname
-        navigate(`${link}/applyEntry`)
+        const link = location.pathname;
+
+        if (!userLogged || !userLogged.idAccount) {
+            navigate("/login", { state: { from: link } });
+            Swal.fire({
+                icon: "info",
+                title: "Login Required",
+                text: "You need to log in to join the competition."
+            });
+        } else {
+            navigate(`${link}/applyEntry`);
+        }
     }
 
     return (
@@ -149,26 +177,40 @@ function ContestDetail() {
                         <h1 className="contestdt-title">{contest.name}</h1>
                         <div className="contestdt-info" >
                             <p className="contestdt-description">{renderDescription(description)}</p>
-                            <p className='contestdt-price'>
+                            <div className='contestdt-price'>
                                 <span style={{
                                     fontSize: "40px"
                                 }}>
-                                    Price: ${contest.price} {contest.winner && (<span> - Winner: {contest.winner.name}</span>)}
+                                    Price: ${contest.price}
                                     <br />
+                                    {contest.winner && (
+                                        <div className="winner-details">
+                                            <h2>🏆 Winner: {contest.winner?.name}</h2>
+                                        </div>
+                                    )}
                                     <strong style={{
                                         fontSize: "30px"
                                     }}>
                                         From: {formatDate(contest.startDate)} To {formatDate(contest.endDate)}
                                     </strong>
-                                </span></p>
+                                </span>
+                            </div>
                             <p className="contestdt-duration">
+                                {contest.status === "NOT YET" ? (<span>This contest has not started yet.</span>)
+                                    : (contest.status === "FINISHED" ? (!contest?.winner ? (<span>This contest has finished.</span>)
+                                        : "")
+                                        : "")}
                             </p>
                         </div>
                     </div>
                     <div className="cmtForm-container" style={{ width: "1000px", margin: "0 auto" }}>
                         <div style={{ display: 'flex', justifyContent: "space-between", width: "960px" }}>
                             <h3 className="cmtForm-header" style={{ fontSize: "45px" }}>Participants' Entries</h3>
-                            {!userRecipe && (<button className='join-competition-button' onClick={() => handleJoinCompetition()}>Join</button>)}
+                            {!userEntry && contest && contest.status !== "FINISHED" && contest.status !== "NOT_YET" && (
+                                <button className='join-competition-button' onClick={handleJoinCompetition}>
+                                    Join
+                                </button>
+                            )}
                         </div>
                         <br /><br />
                         <div>
