@@ -1,19 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { Editor, EditorState, ContentState, convertFromRaw } from "draft-js";
 import "draft-js/dist/Draft.css";
 import axios from "axios";
 import Swal from 'sweetalert2';
+import { DataContext } from "../../context/DatabaseContext";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import IngredientCard from "../recipes/ingredient-card";
 
 
 function ApplyEntry() {
+    const { id } = useParams()
     const [name, setName] = useState("");
     const [description, setDescription] = useState(() => EditorState.createEmpty());
     const [isPublic, setIsPublic] = useState(true);
     const [initialIngredientList, setinItialIngredientList] = useState([]);
     const [selectedIngredients, setSelectedIngredients] = useState([]);
     const [ingredientList, setIngredientList] = useState([]);
+    const [admin, setAdmin] = useState([]);
+    const { tokenInfor } = useContext(DataContext);
+    const [recipeNameList, setRecipeNameList] = useState([]);
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(true);
@@ -33,8 +38,18 @@ function ApplyEntry() {
     useEffect(() => {
         try {
             fetchIngredientList()
+            fetchCurrentAdmin()
+            fetchRecipeNames()
         } catch (err) { console.log(err) }
     }, []);
+
+
+    const fetchRecipeNames = async () => {
+        try {
+            const response = await axios.get("http://localhost:5231/api/Recipe/getAllRecipeNames")
+            setRecipeNameList(response.data.$values)
+        } catch (err) { console.log(err) }
+    }
 
     const fetchIngredientList = async () => {
         try {
@@ -47,10 +62,22 @@ function ApplyEntry() {
         } catch (err) { console.log(err) }
     }
 
+    const fetchCurrentAdmin = async () => {
+        try {
+            const respone = await axios.get(`http://localhost:5231/api/Account/${tokenInfor.email}`);
+            setAdmin(respone.data)
+            console.log(admin)
+        } catch (error) { console.log(error) }
+        finally {
+            setLoading(false);
+        }
+    }
+
     const validate = () => {
         const errors = {};
         try {
             if (!name.trim()) errors.name = "Name is required.";
+            if (recipeNameList.includes(name.trim())) errors.name = "This name has already taken.";
             if (!description.getCurrentContent().hasText()) errors.description = "Description is required.";
             const missingQuantities = selectedIngredients.filter(item => !item.quantity || item.quantity <= 0);
             if (missingQuantities.length > 0) {
@@ -90,20 +117,27 @@ function ApplyEntry() {
 
 
             const descriptionText = description.getCurrentContent().getPlainText();
-            // await axios.put(`http://localhost:5231/api/Recipe/updateRecipe/${idRecipe}`, {
-            //     name,
-            //     description: descriptionText
-            // });
+            await axios.post("http://localhost:5231/api/Recipe/addRecipe", {
+                Name: name.trim(),
+                Description: descriptionText,
+                IsPublic: isPublic,
+                IsApproved: true,
+                IdAccountPost: admin.idAccount,
+                ContestId: id
+            })
 
-            // await axios.put(`http://localhost:5231/api/Recipe/updateRecipeIngredients/${idRecipe}`, {
-            //     ingredients: selectedIngredients.map(item => ({
-            //         ingredientID: item.idIngredient,
-            //         quantity: item.quantity
-            //     }))
-            // });
+            const response = await axios.get(`http://localhost:5231/api/Recipe/detailByName/${name.trim()}`)
+            const idRecipe = response.data.recipe.idRecipe
+
+            await axios.put(`http://localhost:5231/api/Recipe/updateRecipeIngredients/${idRecipe}`, {
+                ingredients: selectedIngredients.map(item => ({
+                    ingredientID: item.idIngredient,
+                    quantity: item.quantity
+                }))
+            });
 
             Swal.fire({ icon: 'success', title: 'Recipe updated successfully!', timer: 1500 })
-                .then(() => navigate("/management", { state: { isRecipe: true } }));
+                .then(() => navigate(`/contest/${id}`));
 
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'Failed to update recipe', text: 'Please try again later.' });
@@ -137,9 +171,7 @@ function ApplyEntry() {
                     background: "none", border: "none", fontSize: "15px", paddingRight: "50px"
                 }}
                     onClick={() =>
-                        navigate("/management", {
-                            state: { isProfile: false, isContest: false, isRecipe: true, isTip: false }
-                        })
+                        navigate(`/contest/${id}`)
                     }>Back</button>
             </div>
             <div style={{
@@ -245,7 +277,9 @@ function ApplyEntry() {
                     )}
 
                     <div>
-                        <button onClick={handleSave} className="add-recipe-submit-button">Apply Entry</button>
+                        <button onClick={handleSave} className="add-recipe-submit-button" style={{
+                            width: "100%", border: "none", backgroundColor: "#ff7700", height: "30px"
+                        }}>Apply Entry</button>
                         {loadingPost && <p style={{ color: "blue" }}>Saving contest, please wait...</p>}
                     </div>
                 </div>

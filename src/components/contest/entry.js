@@ -24,6 +24,8 @@ function Entry() {
     const [isFinished, setIsFinished] = useState(false);
     const [canEdit, setCanEdit] = useState(false);
     const [loadingPost, setLoadingPost] = useState(false);
+    const [recipeNameList, setRecipeNameList] = useState([]);
+
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -37,6 +39,7 @@ function Entry() {
             fetchSpecificIngredients();
             fetchIngredientList();
             fetchCurrentAccount();
+            fetchRecipeNames()
             setCanEdit(currentUserAccount && currentUserAccount.idAccount === idAccountPost && !isApproved && !isFinished)
 
         } catch (er) { console.log(er) }
@@ -123,10 +126,20 @@ function Entry() {
         }
     };
 
+    const fetchRecipeNames = async () => {
+        try {
+            const response = await axios.get("http://localhost:5231/api/Recipe/getAllRecipeNames")
+            setRecipeNameList(response.data.$values)
+        } catch (err) { console.log(err) }
+    }
+
     const validate = () => {
         const errors = {};
         try {
-            if (!name.trim()) errors.name = "Name is required.";
+            if (name.trim() !== recipeNameList.find(recipe => recipe === name.trim())) {
+                if (!name.trim()) errors.name = "Name is required.";
+                if (recipeNameList.includes(name.trim())) errors.name = "This name has already taken.";
+            }
             if (!description.getCurrentContent().hasText()) errors.description = "Description is required.";
             const missingQuantities = selectedIngredients.filter(item => !item.quantity || item.quantity <= 0);
             if (missingQuantities.length > 0) {

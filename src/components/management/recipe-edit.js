@@ -15,6 +15,7 @@ function RecipeEditForm() {
     const [initialIngredientList, setinItialIngredientList] = useState([]);
     const [selectedIngredients, setSelectedIngredients] = useState([]);
     const [ingredientList, setIngredientList] = useState([]);
+    const [recipeNameList, setRecipeNameList] = useState([]);
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(true);
@@ -36,6 +37,7 @@ function RecipeEditForm() {
             fetchRecipe();
             fetchSpecificIngredients()
             fetchIngredientList()
+            fetchRecipeNames()
         } catch (err) { console.log(err) }
     }, []);
 
@@ -98,10 +100,20 @@ function RecipeEditForm() {
         } catch (err) { console.log(err) }
     }
 
+    const fetchRecipeNames = async () => {
+        try {
+            const response = await axios.get("http://localhost:5231/api/Recipe/getAllRecipeNames")
+            setRecipeNameList(response.data.$values)
+        } catch (err) { console.log(err) }
+    }
+
     const validate = () => {
         const errors = {};
         try {
-            if (!name.trim()) errors.name = "Name is required.";
+            if (name.trim() !== recipeNameList.find(recipe => recipe === name.trim())) {
+                if (!name.trim()) errors.name = "Name is required.";
+                if (recipeNameList.includes(name.trim())) errors.name = "This name has already taken.";
+            }
             if (!description.getCurrentContent().hasText()) errors.description = "Description is required.";
             const missingQuantities = selectedIngredients.filter(item => !item.quantity || item.quantity <= 0);
             if (missingQuantities.length > 0) {

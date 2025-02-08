@@ -78,7 +78,7 @@ function AddRecipe({ onClose, reloadTips, IsApproved, title = 'Add recipe succes
         try {
             console.log(recipeNameList)
             if (!name.trim()) errors.name = "Name is required.";
-            if (recipeNameList.includes(name)) errors.name = "This name has already taken.";
+            if (recipeNameList.includes(name.trim())) errors.name = "This name has already taken.";
             if (!description.getCurrentContent().hasText()) errors.description = "Description is required.";
         } catch (err) { console.log(err) }
         return errors;
