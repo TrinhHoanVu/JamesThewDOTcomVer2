@@ -18,6 +18,8 @@ import Home from "../components/Home/home"
 import Meal from "../components/recipes/Meal"
 import Recipe from "../components/recipes/Recipe"
 import Entry from "../components/contest/entry"
+import AddRecipe from "../components/recipes/add-recipe"
+import ApplyEntry from "../components/recipes/apply-entry"
 
 const publicRouter = [
     {
@@ -75,6 +77,10 @@ const publicRouter = [
     {
         path: "/contest/:id/entries/:idRecipe",
         element: <Entry />
+    },
+    {
+        path: "/contest/:id/applyEntry",
+        element: <ApplyEntry />
     }
 ]
 

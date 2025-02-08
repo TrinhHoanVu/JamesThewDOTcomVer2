@@ -157,3 +157,18 @@
 .contest-card {
     cursor: pointer;
 }
+
+.join-competition-button {
+    background-color: #e67e22;
+    border: none;
+    width: 100px;
+    font-weight: bolder;
+    border-radius: 15px;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.join-competition-button:hover {
+    background-color: #ff8400;
+}

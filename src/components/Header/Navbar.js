@@ -39,17 +39,18 @@ const Navbar = () => {
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="container">
         <div className="navbar-content">
-        <div className="brand-and-toggler flex align-center justify-between">
-              <Link to="/" className="navbar-brand fw-3 fs-22 flex align-center"  onClick={scrollToTop}>
-                <MdFoodBank />
-                <span className="navbar-brand-text fw-7">James Thew</span>
-              </Link>
-              <div >
-              <Link to="/recipe" className="login-btn"  onClick={scrollToTop}>Recipe</Link>
-              <Link to="/contest" className="login-btn"  onClick={scrollToTop}>Competition</Link>
+          <div className="brand-and-toggler flex align-center justify-between">
+            <Link to="/" className="navbar-brand fw-3 fs-22 flex align-center" onClick={scrollToTop}>
+              <MdFoodBank />
+              <span className="navbar-brand-text fw-7">James Thew</span>
+            </Link>
+            <div >
+              <Link to="/recipe" className="login-btn" onClick={scrollToTop}>Recipe</Link>
+              <Link to="/contest" className="login-btn" onClick={scrollToTop}>Competition</Link>
+              <Link to="/tips" className="login-btn" onClick={scrollToTop}>Tips</Link>
               <Link className="login-btn" onClick={scrollToContact} > Contact </Link>
-              <Link to="/helppage" className="login-btn"  onClick={scrollToTop}>HelpPage</Link>
-              <Link to="/login" className="login-btn"  onClick={scrollToTop}>Login</Link>             
+              <Link to="/helppage" className="login-btn" onClick={scrollToTop}>HelpPage</Link>
+              <Link to="/login" className="login-btn" onClick={scrollToTop}>Login</Link>
               <button onClick={toggleModal} className="login-btn">
                 <FaBell size={20} />
               </button>
