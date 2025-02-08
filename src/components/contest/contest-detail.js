@@ -39,7 +39,7 @@ function ContestDetail() {
         }
     }, [id]);
 
-    console.log(userRecipe)
+    console.log(entryList)
 
     let userEntry, winnerEntry
 
@@ -206,7 +206,7 @@ function ContestDetail() {
                     <div className="cmtForm-container" style={{ width: "1000px", margin: "0 auto" }}>
                         <div style={{ display: 'flex', justifyContent: "space-between", width: "960px" }}>
                             <h3 className="cmtForm-header" style={{ fontSize: "45px" }}>Participants' Entries</h3>
-                            {!userEntry && contest && contest.status !== "FINISHED" && contest.status !== "NOT_YET" && (
+                            {!userEntry && contest && contest.status !== "FINISHED" && contest.status !== "NOT YET" && (
                                 <button className='join-competition-button' onClick={handleJoinCompetition}>
                                     Join
                                 </button>
@@ -248,14 +248,13 @@ function ContestDetail() {
                                 .filter(entry => entry.isApproved && entry.account.idAccount !== userLogged.idAccount)
                                 .map((entry, index) => (
                                     <div key={entry.idRecipe} className="entry-item">
-                                        <h4>{entry.account.name}'s entry</h4>
+                                        <h4>{entry.account.name}'s entry: {entry.name}</h4>
                                         <div style={{ display: "inline" }}>
-                                            {getShortDescription(entry.description)}{" "}
                                             <button
                                                 onClick={() => handleToggleExpand(entry.idRecipe)}
                                                 style={{ border: "none", background: "none", color: "blue", cursor: "pointer", fontSize: "16px" }}
                                             >
-                                                See More
+                                                See Detail
                                             </button>
                                             <div style={{ paddingTop: "7px" }}>
                                                 <span

@@ -75,6 +75,7 @@ function TipDetail() {
 
     const handlePayment = () => {
         setPayment(true);
+        console.log(payment)
     };
 
     const handleBackToTipPage = () => {
@@ -114,20 +115,23 @@ function TipDetail() {
                         </div>
                     </div>
                 ) : (
-                    <div>
+                    <div className="contestdt-details center-text">
                         <p>
                             This page is for members only. You need to register to view the content. <br />
                             Click <span style={{ color: "orange", cursor: "pointer" }} onClick={handlePayment}>here</span> to register.
                         </p>
                     </div>
                 )}
-                {payment && (<div className="cmtForm-overlay">
-                    <div className="cmtForm-payment-box">
-                        <button className="cmtForm-close-button" onClick={() => handleBackToTipPage()}>✖</button>
-                        <h4 className="cmtForm-message">Your account is not active. Please subcribe to comment.</h4>
-                        <PaymentForm user={user} />
+                {payment && (
+                    <div>
+                        <div className="overlay"></div>
+                        <div className="cmtForm-payment-box">
+                            <button className="cmtForm-close-button" onClick={() => handleBackToTipPage()}>✖</button>
+                            <h4 className="cmtForm-message">Your account is not active. Please subscribe to comment.</h4>
+                            <PaymentForm user={user} />
+                        </div>
                     </div>
-                </div>)}
+                )}
             </div>
         );
     }

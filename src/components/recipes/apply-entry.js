@@ -121,7 +121,7 @@ function ApplyEntry() {
                 Name: name.trim(),
                 Description: descriptionText,
                 IsPublic: isPublic,
-                IsApproved: true,
+                IsApproved: false,
                 IdAccountPost: admin.idAccount,
                 ContestId: id
             })

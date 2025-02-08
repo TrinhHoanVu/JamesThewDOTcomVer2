@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import '../Header/Navbar.css';
 import { MdFoodBank } from 'react-icons/md';
 import { FaBell } from 'react-icons/fa';
+import { DataContext } from "../../context/DatabaseContext";
+import axios from "axios";
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const { tokenInfor } = useContext(DataContext);
 
   const handleScroll = () => {
     const offset = window.scrollY;
@@ -13,9 +18,23 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    try {
+      fetchUser()
+      window.addEventListener("scroll", handleScroll);
+      return () => window.removeEventListener("scroll", handleScroll);
+    } catch (er) { console.log(er) }
   }, []);
+
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5231/api/Account/${tokenInfor.email}`);
+      if (response) {
+        setUser(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -50,7 +69,9 @@ const Navbar = () => {
               <Link to="/tips" className="login-btn" onClick={scrollToTop}>Tips</Link>
               <Link className="login-btn" onClick={scrollToContact} > Contact </Link>
               <Link to="/helppage" className="login-btn" onClick={scrollToTop}>HelpPage</Link>
-              <Link to="/login" className="login-btn" onClick={scrollToTop}>Login</Link>
+              {user ? (<Link to="/management" className="login-btn" onClick={scrollToTop}>Management</Link>
+              ) : (<Link to="/login" className="login-btn" onClick={scrollToTop}>Login</Link>
+              )}
               <button onClick={toggleModal} className="login-btn">
                 <FaBell size={20} />
               </button>
