@@ -17,6 +17,7 @@ function ContestDetail() {
     const [entryList, setEntryList] = useState([]);
     const [likedComments, setLikedComments] = useState([]);
     const [userLogged, setUserLogged] = useState([]);
+    const [userRecipe, setUserRecipe] = useState([]);
     const { tokenInfor } = useContext(DataContext);
 
 
@@ -28,10 +29,14 @@ function ContestDetail() {
             fetchContest();
             fetchAttendeesList()
             fetchUser()
+            fetchUsersRecipe()
+            console.log(id + " " + userLogged.idAccount)
         } else {
             console.error("Invalid contest ID.");
         }
     }, [id]);
+
+    const userEntry = entryList.find(entry => entry.account.idAccount === userLogged.idAccount);
 
     const fetchUser = async () => {
         try {
@@ -70,6 +75,18 @@ function ContestDetail() {
             console.log("not found contest")
         }
     };
+
+    const fetchUsersRecipe = async () => {
+        try {
+            const response = await axios.get("http://localhost:5231/api/Contest/getUsersRecipe", {
+                params: {
+                    idContest: id,
+                    idAccount: userLogged.idAccount
+                }
+            });
+            setUserRecipe(response.data.$values)
+        } catch (er) { console.log(er) }
+    }
 
     const formatDate = (dateString) => {
         if (!dateString) return "";
@@ -110,13 +127,18 @@ function ContestDetail() {
 
             setEntryList(entryList.map(entry =>
                 entry.idRecipe === recipeId
-                    ? { ...entry, likes: response.data.likes } 
+                    ? { ...entry, likes: response.data.likes, likedByUser: response.data.liked }
                     : entry
             ));
         } catch (error) {
             console.error('Error liking comment:', error);
         }
     };
+
+    const handleJoinCompetition = () => {
+        const link = location.pathname
+        navigate(`${link}/applyEntry`)
+    }
 
     return (
         <div className="contestdt-container">
@@ -144,16 +166,19 @@ function ContestDetail() {
                         </div>
                     </div>
                     <div className="cmtForm-container" style={{ width: "1000px", margin: "0 auto" }}>
-                        <h3 className="cmtForm-header" style={{ fontSize: "45px" }}>Participants' Entries</h3>
+                        <div style={{ display: 'flex', justifyContent: "space-between", width: "960px" }}>
+                            <h3 className="cmtForm-header" style={{ fontSize: "45px" }}>Participants' Entries</h3>
+                            {!userRecipe && (<button className='join-competition-button' onClick={() => handleJoinCompetition()}>Join</button>)}
+                        </div>
                         <br /><br />
-                        <div className="entries-list" style={{ display: 'flex', flexDirection: "column", width: "1000px" }}>
-                            {entryList.map((entry, index) => (
-                                <div key={entry.idRecipe} className="entry-item">
-                                    <h4>{entry.account.name}'s entry</h4>
+                        <div>
+                            {userEntry && (
+                                <div className="entry-item">
+                                    <h4>Your entry</h4>
                                     <div style={{ display: "inline" }}>
-                                        {getShortDescription(entry.description)}{" "}
+                                        {getShortDescription(userEntry.description)}{" "}
                                         <button
-                                            onClick={() => handleToggleExpand(entry.idRecipe)}
+                                            onClick={() => handleToggleExpand(userEntry.idRecipe)}
                                             style={{ border: "none", background: "none", color: "blue", cursor: "pointer", fontSize: "16px" }}
                                         >
                                             See More
@@ -163,20 +188,53 @@ function ContestDetail() {
                                                 style={{
                                                     fontSize: "20px",
                                                     cursor: "pointer",
-                                                    // color: isLiked ? 'black' : 'gray',
+                                                    color: userEntry.likedByUser ? 'black' : 'gray',
                                                 }}
-                                                onClick={contest.status !== "FINISHED" ? () => handleLike(entry.idRecipe) : null}
                                             >
                                                 <AiFillLike />
                                             </span>
-                                            <span style={{ fontSize: "13px", paddingBottom: "5px" }}> {entry.likes}</span>
+                                            <span style={{ fontSize: "13px", paddingBottom: "5px" }}> {userEntry.likes}</span>
                                         </div>
                                     </div>
+                                    <hr />
                                     <br /><br />
                                 </div>
-                            ))}
-
+                            )}
                         </div>
+                        <div className="entries-list" style={{ display: 'flex', flexDirection: "column", width: "1000px" }}>
+                            {entryList
+                                .filter(entry => entry.isApproved && entry.account.idAccount !== userLogged.idAccount)
+                                .map((entry, index) => (
+                                    <div key={entry.idRecipe} className="entry-item">
+                                        <h4>{entry.account.name}'s entry</h4>
+                                        <div style={{ display: "inline" }}>
+                                            {getShortDescription(entry.description)}{" "}
+                                            <button
+                                                onClick={() => handleToggleExpand(entry.idRecipe)}
+                                                style={{ border: "none", background: "none", color: "blue", cursor: "pointer", fontSize: "16px" }}
+                                            >
+                                                See More
+                                            </button>
+                                            <div style={{ paddingTop: "7px" }}>
+                                                <span
+                                                    style={{
+                                                        fontSize: "20px",
+                                                        cursor: "pointer",
+                                                        color: entry.likedByUser ? 'black' : 'gray',
+                                                    }}
+                                                    onClick={contest.status !== "FINISHED" ? () => handleLike(entry.idRecipe) : null}
+                                                >
+                                                    <AiFillLike />
+                                                </span>
+                                                <span style={{ fontSize: "13px", paddingBottom: "5px" }}> {entry.likes}</span>
+                                            </div>
+                                        </div>
+                                        <br /><br />
+                                    </div>
+                                ))}
+                        </div>
+
+
                     </div>
                     <br /><br /><br /><br />
 

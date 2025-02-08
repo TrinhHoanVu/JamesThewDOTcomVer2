@@ -17,7 +17,15 @@ function App() {
   const { tokenInfor } = useContext(DataContext);
   const location = useLocation();
 
-  const showNavbarAndContact = location.pathname === "/" || location.pathname.startsWith("/recipe");
+  const allowLinks = ["/", "/recipe", "/contest", "contest/:id", "/tips"]
+
+  const showContact = location.pathname === "/" || location.pathname.startsWith("/recipe");
+  const showNavbarAndContact = allowLinks.some(path => {
+    if (path.includes(":id")) {
+      return location.pathname.startsWith("/contest/");
+    }
+    return location.pathname === path;
+  });
 
   return (
     <div className="container">
@@ -56,7 +64,7 @@ function App() {
             />
           ))}
         </Routes>
-        {showNavbarAndContact && <ContactInfo />}
+        {showContact && <ContactInfo />}
       </AuthProvider>
     </div>
   );

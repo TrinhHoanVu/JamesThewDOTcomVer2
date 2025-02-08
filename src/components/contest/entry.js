@@ -42,16 +42,6 @@ function Entry() {
         } catch (er) { console.log(er) }
     }, []);
 
-    useEffect(() => {
-        console.log("currentUserAccount:", currentUserAccount);
-        console.log("idAccountPost:", idAccountPost);
-        console.log("isApproved:", isApproved);
-        console.log("isFinished:", isFinished);
-        setCanEdit(currentUserAccount && currentUserAccount.idAccount === idAccountPost && !isApproved && !isFinished);
-    }, [currentUserAccount, idAccountPost, isApproved, isFinished]);
-
-
-    console.log(canEdit)
     const fetchCurrentAccount = async () => {
         try {
             const response = await axios.get(`http://localhost:5231/api/Account/${tokenInfor.email}`)
@@ -198,7 +188,7 @@ function Entry() {
             <div style={{
                 textAlign: "center", display: "flex", alignItems: "center",
                 justifyContent: "space-between", flexDirection: "row", height: "30px",
-                width: "100%"
+                width: "100%", marginTop: "20px"
             }}>
                 <div style={{ textAlign: "center", width: "97%" }}>
                     <h2>Recipe Details</h2>
@@ -213,7 +203,7 @@ function Entry() {
                 </button>
             </div>
             <div style={{
-                width: "100vw", height: "100vh", display: "flex", padding: "20px", boxSizing: "border-box",
+                width: "100vw", height: "100vh", display: "flex", boxSizing: "border-box",
                 background: "linear-gradient(to top, rgba(255, 126, 95, 0.5), #ffffff)"
             }}>
                 <div style={{ flex: 1, padding: "20px", display: "flex", flexDirection: "column" }}>
@@ -222,6 +212,7 @@ function Entry() {
                         {canEdit ? (<input type="text" value={name} onChange={(e) => setName(e.target.value)}
                             style={{ width: "97%", padding: "8px", backgroundColor: "transparent" }} />) : (<p>{name}</p>)}
                     </div>
+                    <br />
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                         <label>Cooking Procedure:</label>
                         <div
@@ -307,8 +298,12 @@ function Entry() {
                             </table>
                         </div>
                     )}
+                    {console.log(canEdit)}
+                    <br />
                     {canEdit && (<div>
-                        <button onClick={handleSave} className="add-recipe-submit-button">Save</button>
+                        <button onClick={handleSave} className="add-recipe-submit-button" style={{
+                            width: "100%", border: "none", backgroundColor: "#ff7700", height: "30px"
+                        }}>Save</button>
                         {loadingPost && <p style={{ color: "blue" }}>Saving contest, please wait...</p>}
                     </div>)}
                 </div>
