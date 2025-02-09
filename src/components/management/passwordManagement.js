@@ -115,7 +115,12 @@ function PasswordManagement() {
                         {errors.currentPassword && <span className="error-message" style={{ marginLeft: '20px', color: 'red' }}>
                             {errors.currentPassword}
                         </span>}</label>
-                    <div className="password-input">
+                    <div className="password-input" style={{
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        width: "100%"
+                    }}>
                         <input
                             type={showPassword.current ? "text" : "password"}
                             id="current-password"
@@ -124,7 +129,15 @@ function PasswordManagement() {
                             onChange={(e) => setCurrentPassword(e.target.value)}
                         />
                         <span className="toggle-password"
-                            style={{ position: 'absolute', top: '26.5%', right: '170px', transform: 'translateY(-50%)' }}
+                            style={{
+                                position: "absolute",
+                                right: "10px",
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center"
+                            }}
                             onClick={() => togglePasswordVisibility("current")}>
                             {showPassword.current ? <EyeOff /> : <Eye />}
                         </span>
@@ -137,7 +150,12 @@ function PasswordManagement() {
                         {errors.newPassword && <span className="error-message" style={{ marginLeft: '20px', color: 'red' }}>
                             {errors.newPassword}</span>}
                     </label>
-                    <div className="password-input">
+                    <div className="password-input" style={{
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        width: "100%"
+                    }}>
                         <input
                             type={showPassword.new ? "text" : "password"}
                             id="new-password"
@@ -146,8 +164,15 @@ function PasswordManagement() {
                             onChange={(e) => setNewPassword(e.target.value)}
                         />
                         <span className="toggle-password"
-                            style={{ position: 'absolute', top: '40%', right: '170px', transform: 'translateY(-50%)' }}
-                            onClick={() => togglePasswordVisibility("new")}>
+                            style={{
+                                position: "absolute",
+                                right: "10px",
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center"
+                            }}>
                             {showPassword.new ? <EyeOff /> : <Eye />}
                         </span>
                     </div>
@@ -158,7 +183,12 @@ function PasswordManagement() {
                         {errors.confirmPassword && <span className="error-message" style={{ marginLeft: '20px', color: 'red' }}>
                             {errors.confirmPassword}</span>}
                     </label>
-                    <div className="password-input">
+                    <div className="password-input" style={{
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        width: "100%"
+                    }}>
                         <input
                             type={showPassword.confirm ? "text" : "password"}
                             id="confirm-password"
@@ -167,7 +197,15 @@ function PasswordManagement() {
                             onChange={(e) => setConfirmNewPassword(e.target.value)}
                         />
                         <span className="toggle-password"
-                            style={{ position: 'absolute', top: '53.5%', right: '170px', transform: 'translateY(-50%)' }}
+                            style={{
+                                position: "absolute",
+                                right: "10px",
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center"
+                            }}
                             onClick={() => togglePasswordVisibility("confirm")}>
                             {showPassword.confirm ? <EyeOff /> : <Eye />}
                         </span>

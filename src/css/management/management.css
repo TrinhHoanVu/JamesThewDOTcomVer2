@@ -12,15 +12,15 @@ body {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background-color: #f4f4f4;
     box-sizing: border-box;
 }
 
 .management-slide {
-    width: 200px;
-    height: 735px;
+    width: 15vw;
+    height: 100vh;
     background-image: linear-gradient(to top, #ff7e5f, #faa05b);
     display: flex;
     flex-direction: column;
@@ -58,8 +58,8 @@ body {
 }
 
 .management-function {
-    width: 1310px;
-    height: 735px;
+    width: 85vw;
+    height: 100vh;
     /* background-color: #fff; */
     background: linear-gradient(to top, rgba(255, 126, 95, 0.5), #ffffff);
 }

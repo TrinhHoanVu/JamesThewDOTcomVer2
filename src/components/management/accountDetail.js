@@ -205,8 +205,9 @@ function AccountDetail() {
                 <p className="subtitle">Manage your account information</p>
                 <form onSubmit={handleUpdateProfile}>
                     <div className="form-group">
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email" className="profile-label">Email</label>
                         <input
+                            className="profile-input"
                             type="email"
                             id="email"
                             name="email"
@@ -215,8 +216,9 @@ function AccountDetail() {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="name">Name</label>
+                        <label htmlFor="name" className="profile-label">Name</label>
                         <input
+                            className="profile-input"
                             type="text"
                             id="name"
                             name="name"
@@ -226,8 +228,9 @@ function AccountDetail() {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="phone">Phone Number</label>
+                        <label htmlFor="phone" className="profile-label">Phone Number</label>
                         <input
+                            className="profile-input"
                             type="text"
                             id="phone"
                             name="phone"
@@ -242,8 +245,9 @@ function AccountDetail() {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="address">Address</label>
+                        <label htmlFor="address" className="profile-label">Address</label>
                         <input
+                            className="profile-input"
                             type="text"
                             id="address"
                             name="address"
@@ -317,8 +321,9 @@ function AccountDetail() {
                         </div>)}
                     </div>
                     {isUser === 'USER' && (<div className="form-group">
-                        <label htmlFor="expiredDay">Expired Day</label>
+                        <label htmlFor="expiredDay" className="profile-label">Expired Day</label>
                         {expiredDay ? <input
+                            className="profile-input"
                             type="text"
                             readOnly
                             id="expiredDay"
