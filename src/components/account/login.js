@@ -27,7 +27,7 @@ const Login = () => {
             console.log("tokenDecode: ", tokenDecode);
             setTokenInfor(tokenDecode)
             const allowedRoles = ["SUPERADMIN", "ADMIN"];
-            
+
             if (allowedRoles.includes(tokenDecode.role)) {
               if (from === "/") {
                 navigate("/management", { state: { isProfile: true, isContest: false, isRecipe: false, isTip: false } });
@@ -56,17 +56,19 @@ const Login = () => {
         <p className="subtitle">Welcome to JamesThew's Kitchen!</p>
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label>Email:</label>
+            <label className="login-label-css"            >Email:</label>
             <input
               type="text"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="login-input-css"
             />
           </div>
           <div className="form-group">
-            <label>Password:</label>
+            <label className="login-label-css">Password:</label>
             <input
+              className="login-input-css"
               type="password"
               placeholder="Enter your password"
               value={password}
