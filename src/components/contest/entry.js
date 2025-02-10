@@ -25,6 +25,7 @@ function Entry() {
     const [currentUserAccount, setCurrentUserAccount] = useState(null);
     const [isFinished, setIsFinished] = useState(false);
     const [canEdit, setCanEdit] = useState(false);
+    const [canDelete, setCanDelete] = useState(false);
     const [loadingPost, setLoadingPost] = useState(false);
     const [recipeNameList, setRecipeNameList] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -74,6 +75,9 @@ function Entry() {
             if (currentUserAccount && idAccountPost !== null) {
                 setCanEdit(currentUserAccount.idAccount === idAccountPost && !isApproved && !isFinished);
             }
+            if (currentUserAccount && idAccountPost !== null) {
+                setCanDelete(currentUserAccount.idAccount === idAccountPost);
+            }
         } catch (err) { console.log(err) }
     }, [currentUserAccount, idAccountPost, isApproved, isFinished]);
 
@@ -87,8 +91,6 @@ function Entry() {
             console.log(error);
         }
     }
-
-
 
     const fetchRecipe = async () => {
         try {
@@ -127,7 +129,8 @@ function Entry() {
                 "quantity": item.quantity,
                 "name": item.ingredient.name,
                 "unit": item.ingredient.unit.trim(),
-                "recipeIngredients": null
+                "recipeIngredients": null,
+                "isApproved": item.ingredient.isApproved
             }));
             setInitialIngredientList(formattedIngredients);
             setSelectedIngredients(formattedIngredients);
@@ -227,26 +230,59 @@ function Entry() {
                 return;
             }
 
-            Swal.fire({
-                title: "Saving...",
-                text: "Please wait while we save the recipe.",
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
+            // Swal.fire({
+            //     title: "Saving...",
+            //     text: "Please wait while we save the recipe.",
+            //     allowOutsideClick: false,
+            //     didOpen: () => {
+            //         Swal.showLoading();
+            //     }
+            // });
 
-            setLoadingPost(true);
+
+            const newIngredients = selectedIngredients.filter(item =>
+                !ingredientList.some(existingIngredient => existingIngredient.name.toLowerCase() === item.name.toLowerCase())
+            );
+
+            const unApprovedIngredients = initialIngredientList.filter(item => !item.isApproved)
+            const unapprovedIngredientIds = unApprovedIngredients.map(item => item.idIngredient);
+
+            if (unapprovedIngredientIds.length > 0)
+                await axios.delete('http://localhost:5231/api/Recipe/DeleteUnapprovedIngredients', {
+                    data: unapprovedIngredientIds
+                });
+
+            await axios.delete(`http://localhost:5231/api/Recipe/DeleteByRecipeId/${idRecipe}`)
+
+            let addedIngredients = [];
+
+            if (newIngredients.length > 0) {
+                const response = await axios.post("http://localhost:5231/api/Recipe/addNewIngredients",
+                    newIngredients.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        unit: item.unit,
+                        isApproved: false
+                    }))
+                );
+                addedIngredients = response.data.$values;
+            }
+
+            const updatedSelectedIngredients = selectedIngredients.map(item => {
+                const newIngredient = addedIngredients.find(ing => ing.name.toLowerCase() === item.name.toLowerCase());
+                return newIngredient ? { ...item, idIngredient: newIngredient.idIngredient } : item;
+            });
 
             const descriptionText = description.getCurrentContent().getPlainText();
+
             await axios.put(`http://localhost:5231/api/Recipe/updateRecipe/${idRecipe}`, {
-                name,
+                name: name,
                 description: descriptionText,
-                isApproved: false
-            });
+                isPublic: isPublic
+            })
 
             await axios.put(`http://localhost:5231/api/Recipe/updateRecipeIngredients/${idRecipe}`, {
-                ingredients: selectedIngredients.map(item => ({
+                ingredients: updatedSelectedIngredients.map(item => ({
                     ingredientID: item.idIngredient,
                     quantity: item.quantity
                 }))
@@ -259,6 +295,32 @@ function Entry() {
             setLoadingPost(false);
         }
     };
+
+    const handleDelete = async (e) => {
+        e.preventDefault();
+        try {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            });
+            if (result.isConfirmed) {
+                try {
+                    // await axios.delete(`http://localhost:5231/api/Recipe/deleteRecipe/${idRecipe}`);
+
+
+                    Swal.fire('Deleted!', 'The recipe has been deleted.', 'success');
+                    // navigate(`/contest/${id}`);
+                } catch (err) {
+                    Swal.fire('Error!', 'Failed to delete the recipe.', 'error');
+                }
+            }
+        } catch (err) { console.log(err) }
+    }
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>{error}</p>;
@@ -338,7 +400,7 @@ function Entry() {
                         </div>
                     )}
                     <br />
-                    {console.log(canEdit)}
+
                     {canEdit && selectedIngredients.length > 0 ? (
                         <div className="ingredient-card-wrapper">
                             {selectedIngredients.map((ingredient, index) => {
@@ -352,46 +414,52 @@ function Entry() {
                             })}
                         </div>
                     ) : ""}
-
+                    <br />
                     {selectedIngredients.length > 0 && (
-                        <table className="entry-ingredient-table">
-                            <thead>
-                                <tr>
-                                    <th>Ingredient</th>
-                                    <th>Quantity</th>
-                                    <th>Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {selectedIngredients.map((ingredient, index) => {
-                                    return (
-                                        <tr key={index}>
-                                            <td>{ingredient.name}</td>
-                                            <td>
-                                                {canEdit ? (
-                                                    <input type="number" min={0}
-                                                        className="entry-input-field"
-                                                        defaultValue={ingredient.quantity}
-                                                        onChange={(e) => {
-                                                            const value = Math.max(0, e.target.value);
-                                                            setSelectedIngredients(selectedIngredients.map(item =>
-                                                                item.name === ingredient.name ? { ...item, quantity: value } : item
-                                                            ));
-                                                        }} />
-                                                ) : ingredient.quantity}
-                                            </td>
-                                            <td>{ingredient.unit}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                        <div className="entry-ingredient-table-wrapper">
+                            <table className="entry-ingredient-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ingredient</th>
+                                        <th>Quantity</th>
+                                        <th>Unit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {selectedIngredients.map((ingredient, index) => {
+                                        return (
+                                            <tr key={index}>
+                                                <td>{ingredient.name}</td>
+                                                <td>
+                                                    {canEdit ? (
+                                                        <input type="number" min={0}
+                                                            className="entry-input-field"
+                                                            defaultValue={ingredient.quantity}
+                                                            onChange={(e) => {
+                                                                const value = Math.max(0, e.target.value);
+                                                                setSelectedIngredients(selectedIngredients.map(item =>
+                                                                    item.name === ingredient.name ? { ...item, quantity: value } : item
+                                                                ));
+                                                            }} />
+                                                    ) : ingredient.quantity}
+                                                </td>
+                                                <td>{ingredient.unit}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
+                    <div style={{ display: 'flex', gap: "10px" }}>
+                        {canEdit && (
+                            <button className="entry-save-button" onClick={handleSave}>Save</button>
+                        )}
+                        {canDelete && <button className="entry-save-button" onClick={handleDelete}>Delete</button>}
+                    </div>
                 </div>
             </div>
-            {canEdit && (
-                <button className="entry-save-button" onClick={handleSave}>Save</button>
-            )}
+
         </div>
     );
 
