@@ -6,7 +6,8 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 import { useNavigate, useParams } from "react-router-dom";
 import IngredientCard from "../recipes/ingredient-card";
-import Select from 'react-select';  // Import react-select
+import Select from 'react-select';
+import "../../css/contest/entry.css"
 
 function Entry() {
     const { idRecipe } = useParams();
@@ -43,9 +44,11 @@ function Entry() {
     }, []);
 
     useEffect(() => {
-        if (currentUserAccount && idAccountPost !== null) {
-            setCanEdit(currentUserAccount.idAccount === idAccountPost && !isApproved && !isFinished);
-        }
+        try {
+            if (currentUserAccount && idAccountPost !== null) {
+                setCanEdit(currentUserAccount.idAccount === idAccountPost && !isApproved && !isFinished);
+            }
+        } catch (err) { console.log(err) }
     }, [currentUserAccount, idAccountPost, isApproved, isFinished]);
 
     const fetchCurrentAccount = async () => {
@@ -198,126 +201,103 @@ function Entry() {
     if (error) return <p>{error}</p>;
 
     return (
-        <div style={{ maxHeight: "100vh" }}>
-            <div style={{
-                textAlign: "center", display: "flex", alignItems: "center",
-                justifyContent: "space-between", flexDirection: "row", height: "30px",
-                width: "100%", marginTop: "20px"
-            }}>
-                <div style={{ textAlign: "center", width: "97%" }}>
-                    <h2>Recipe Details</h2>
-                </div>
-                <button
-                    style={{
-                        height: "20px", width: "3%", cursor: "pointer",
-                        background: "none", border: "none", fontSize: "15px", paddingRight: "50px"
-                    }}
-                    onClick={handleBack}>
-                    Back
-                </button>
+        <div className="entry-container">
+            <div className="entry-header">
+                <h2>Recipe Details</h2>
+                <button className="entry-back-button" onClick={handleBack}>Back</button>
             </div>
-            <div style={{
-                width: "100vw", height: "100vh", display: "flex", boxSizing: "border-box",
-                background: "linear-gradient(to top, rgba(255, 126, 95, 0.5), #ffffff)"
-            }}>
-                <div style={{ flex: 1, padding: "20px", display: "flex", flexDirection: "column" }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <label>Name:</label>
-                        {canEdit ? (
-                            <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-                                style={{ width: "97%", padding: "8px", backgroundColor: "transparent" }} />
-                        ) : (<p>{name}</p>)}
-                    </div>
+            <div className="entry-content">
+                <div className="entry-left-panel">
+                    <label className="entry-label">Name:</label>
+                    {canEdit ? (
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+                            className="entry-input-field" />
+                    ) : (<p>{name}</p>)}
                     <br />
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <label>Cooking Procedure:</label>
-                        <div
-                            style={{
-                                border: "1px solid #ddd", height: "300px", padding: "10px",
-                                backgroundColor: "rgba(255, 255, 255, 0.2)"
-                            }}>
-                            <Editor
-                                ref={editorRef}
-                                editorState={description}
-                                readOnly={!canEdit}
-                                onChange={canEdit ? setDescription : () => { }}
+                    <label className="entry-label">Cooking Procedure:</label>
+                    <div className="entry-editor-container">
+                        <Editor
+                            ref={editorRef}
+                            editorState={description}
+                            readOnly={!canEdit}
+                            onChange={canEdit ? setDescription : () => { }}
+                        />
+                    </div>
+                </div>
+                <div className="entry-right-panel">
+                    <label className="entry-label">Ingredients:</label>
+                    {canEdit && (
+                        <div className="entry-ingredient-section">
+                            <Select
+                                className="entry-select-ingredient"
+                                options={ingredientList.map(ingredient => ({
+                                    value: ingredient.name,
+                                    label: ingredient.name,
+                                }))}
+                                onChange={(selectedOption) => handleIngredientSelect(selectedOption.value)}
+                                placeholder="Select an ingredient"
+                                isSearchable={true}
                             />
                         </div>
-                    </div>
-                </div>
+                    )}
+                    <br />
+                    {console.log(canEdit)}
+                    {canEdit && selectedIngredients.length > 0 ? (
+                        <div className="ingredient-card-wrapper">
+                            {selectedIngredients.map((ingredient, index) => {
+                                return (
+                                    <IngredientCard
+                                        key={index}
+                                        name={ingredient?.name || "UNKNOWN"}
+                                        handleIngredientRemove={() => { }}
+                                    />
+                                );
+                            })}
+                        </div>
+                    ) : ""}
 
-                <div style={{ flex: 1, padding: "20px" }}>
-                    <label>Ingredients:</label>
-                    {canEdit && (<div style={{ marginBottom: "10px" }}>
-                        <Select
-                            options={ingredientList.map(ingredient => ({
-                                value: ingredient.name,
-                                label: ingredient.name,
-                            }))}
-                            onChange={(selectedOption) => handleIngredientSelect(selectedOption.value)}
-                            placeholder="Select an ingredient"
-                            isSearchable={true}
-                        />
-                        <br />
-                        {selectedIngredients.length > 0 ? (
-                            <div className="ingredient-card-wrapper">
+                    {selectedIngredients.length > 0 && (
+                        <table className="entry-ingredient-table">
+                            <thead>
+                                <tr>
+                                    <th>Ingredient</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 {selectedIngredients.map((ingredient, index) => {
                                     return (
-                                        <IngredientCard
-                                            key={index}
-                                            name={ingredient?.name || "UNKNOWN"}
-                                            handleIngredientRemove={() => { }}
-                                        />
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <p>No ingredients selected.</p>
-                        )}
-                    </div>)}
-                    <br />
-                    {selectedIngredients.length > 0 && (
-                        <div style={{ maxHeight: "355px", overflowY: "auto", border: "1px solid #ccc", marginTop: "10px" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                                <thead>
-                                    <tr style={{ backgroundColor: "#f4f4f4" }}>
-                                        <th style={{ padding: "10px", border: "1px solid #ddd", width: "70%" }}>Ingredient</th>
-                                        <th style={{ padding: "10px", border: "1px solid #ddd", width: "20%" }}>Quantity</th>
-                                        <th style={{ padding: "10px", border: "1px solid #ddd", width: "10%" }}>Unit</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {selectedIngredients.map((ingredientName, index) => {
-                                        const ingredient = ingredientList.find(item => item.name === ingredientName.name);
-                                        return (
-                                            <tr key={index}>
-                                                <td style={{ padding: "10px", border: "1px solid #ddd" }}>{ingredientName.name}</td>
-                                                <td style={{ padding: "10px", border: "1px solid #ddd", textAlign: "center" }}>
-                                                    {canEdit ? (<input type="number" min={0}
-                                                        className="add-ingredient-table"
-                                                        defaultValue={ingredientName.quantity}
+                                        <tr key={index}>
+                                            <td>{ingredient.name}</td>
+                                            <td>
+                                                {canEdit ? (
+                                                    <input type="number" min={0}
+                                                        className="entry-input-field"
+                                                        defaultValue={ingredient.quantity}
                                                         onChange={(e) => {
                                                             const value = Math.max(0, e.target.value);
                                                             setSelectedIngredients(selectedIngredients.map(item =>
                                                                 item.name === ingredient.name ? { ...item, quantity: value } : item
                                                             ));
-                                                        }}
-                                                        style={{ width: "50%", textAlign: "center" }} />) : ingredientName.quantity}
-                                                </td>
-                                                <td style={{ padding: "10px", border: "1px solid #ddd", textAlign: "center" }}>
-                                                    {ingredient ? ingredient.unit.trim() : "Unit not found"}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                                        }} />
+                                                ) : ingredient.quantity}
+                                            </td>
+                                            <td>{ingredient.unit}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     )}
                 </div>
             </div>
+            {canEdit && (
+                <button className="entry-save-button" onClick={handleSave}>Save</button>
+            )}
         </div>
     );
+
 }
 
 export default Entry;

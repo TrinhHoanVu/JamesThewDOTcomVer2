@@ -299,7 +299,7 @@ function Evaluation() {
             <div className="attendees-modal">
                 <div style={{ textAlign: "center", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: "row", height: "30px" }}>
                     <div style={{ textAlign: "center", width: "97%" }}>
-                        <h2>Participant List</h2>
+                        <h2>Participants' Entries</h2>
                     </div>
                     <button style={{
                         height: "20px", width: "3%", cursor: "pointer",

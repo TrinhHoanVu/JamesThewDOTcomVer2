@@ -379,7 +379,7 @@ function TipManagement() {
                 {addTipTable && (
                     <div className="edit-modal-overlay">
                         <div className="edit-modal">
-                            <AddTip onClose={() => setAddTipTable(false)} reloadTips={reloadTips} IsApproved={true} />
+                            <AddTip isUser={false} onClose={() => setAddTipTable(false)} reloadTips={reloadTips} IsApproved={true} />
                             <button className="close-modal-button" onClick={() => setAddTipTable(false)}>
                                 Close
                             </button>
