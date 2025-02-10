@@ -96,7 +96,7 @@ function Evaluation() {
 
     const fetchIngredients = async () => {
         try {
-            const response = await axios.get("http://localhost:5231/api/Recipe/getAllIngredient")
+            const response = await axios.get("http://localhost:5231/api/Recipe/getAllApprovedIngredient")
             setIngredientList(response.data.$values)
         } catch (err) { console.log(err) }
     }
