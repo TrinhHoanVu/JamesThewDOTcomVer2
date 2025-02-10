@@ -84,6 +84,7 @@ function AttendeesDetail() {
         try {
             const response = await axios.get("http://localhost:5231/api/Recipe/getAllIngredient")
             setIngredientList(response.data.$values)
+            console.log(ingredientList)
         } catch (err) { console.log(err) }
     }
 
@@ -154,7 +155,6 @@ function AttendeesDetail() {
     const handleApproveComments = async () => {
         try {
             const recipesToApprove = selectedComments.filter(recipe => !recipe.isApproved);
-            console.log(recipesToApprove[0].idRecipe)
             if (recipesToApprove.length === 0) {
                 Swal.fire({
                     icon: "info",
@@ -164,9 +164,21 @@ function AttendeesDetail() {
                 return;
             }
 
+            let ingredientsToApprove = [];
+            recipesToApprove.forEach(recipe => {
+                recipe.recipeIngredients.$values.forEach(ingredientId => {
+                    const ingredient = ingredientList.find(i => i.idIngredient === ingredientId.ingredientID);
+                    if (ingredient && !ingredient.isApproved) {
+                        ingredientsToApprove.push(ingredient.idIngredient);
+                    }
+                });
+            });
+
+            ingredientsToApprove = [...new Set(ingredientsToApprove)];
+
             Swal.fire({
                 title: 'Are you sure?',
-                text: 'Do you want to approve all the selected recipes?',
+                text: 'Do you want to approve the selected recipes and their ingredients?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -180,6 +192,10 @@ function AttendeesDetail() {
                             axios.put(`http://localhost:5231/api/Contest/approveRecipe/${recipe.idRecipe}`)
                         )
                     );
+
+                    if (ingredientsToApprove.length > 0) {
+                        await axios.put("http://localhost:5231/api/Contest/approveIngredients", ingredientsToApprove);
+                    }
 
                     setSelectedComments(prevComments =>
                         prevComments.map(recipe =>
@@ -197,22 +213,31 @@ function AttendeesDetail() {
                         )
                     );
 
+                    setIngredientList(prevIngredients =>
+                        prevIngredients.map(ingredient =>
+                            ingredientsToApprove.includes(ingredient.idIngredient)
+                                ? { ...ingredient, isApproved: true }
+                                : ingredient
+                        )
+                    );
+
                     Swal.fire({
                         icon: "success",
                         title: "Success",
-                        text: "Selected recipes have been approved!"
+                        text: "Selected recipes and their ingredients have been approved!"
                     });
                 }
             });
         } catch (error) {
-            console.error("Error approving recipes:", error);
+            console.error("Error approving recipes and ingredients:", error);
             Swal.fire({
                 icon: "error",
                 title: "Approval Failed",
-                text: "Failed to approve recipes. Please try again."
+                text: "Failed to approve recipes and ingredients. Please try again."
             });
         }
     };
+
 
 
     return (

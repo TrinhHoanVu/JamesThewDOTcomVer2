@@ -91,7 +91,7 @@ function RecipeEditForm() {
 
     const fetchIngredientList = async () => {
         try {
-            const response = await axios.get("http://localhost:5231/api/Recipe/getAllIngredient")
+            const response = await axios.get("http://localhost:5231/api/Recipe/getAllApprovedIngredient")
             const ingredientsWithQuantity = response.data.$values.map(item => ({
                 ...item,
                 quantity: 0,

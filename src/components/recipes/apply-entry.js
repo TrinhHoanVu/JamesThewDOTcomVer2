@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { Editor, EditorState, ContentState, convertFromRaw } from "draft-js";
+import { Editor, EditorState } from "draft-js";
 import "draft-js/dist/Draft.css";
 import axios from "axios";
 import Swal from 'sweetalert2';
 import { DataContext } from "../../context/DatabaseContext";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import IngredientCard from "../recipes/ingredient-card";
 import Select from 'react-select';
 
@@ -25,6 +25,29 @@ function ApplyEntry() {
     const [newIngredientUnit, setNewIngredientUnit] = useState("");
     const [showCustomIngredient, setShowCustomIngredient] = useState(false);
 
+    const units = [
+        { value: 'grams', label: 'grams' },
+        { value: 'kilograms', label: 'kilograms' },
+        { value: 'milliliters', label: 'milliliters' },
+        { value: 'liters', label: 'liters' },
+        { value: 'tablespoon', label: 'tablespoon' },
+        { value: 'teaspoon', label: 'teaspoon' },
+        { value: 'cup', label: 'cup' },
+        { value: 'ounce', label: 'ounce' },
+        { value: 'pound', label: 'pound' },
+        { value: 'centimeter', label: 'centimeter' },
+        { value: 'meter', label: 'meter' },
+        { value: 'inch', label: 'inch' },
+        { value: 'pint', label: 'pint' },
+        { value: 'quart', label: 'quart' },
+        { value: 'gallon', label: 'gallon' },
+        { value: 'fluid_ounce', label: 'fluid ounce' },
+        { value: 'bunch', label: 'bunch' },
+        { value: 'leaf', label: 'leaf' },
+        { value: 'pinch', label: 'pinch' },
+        { value: 'stick', label: 'stick' }
+    ];
+
     const navigate = useNavigate();
     const editorRef = useRef();
 
@@ -43,7 +66,7 @@ function ApplyEntry() {
 
     const fetchIngredientList = async () => {
         try {
-            const response = await axios.get("http://localhost:5231/api/Recipe/getAllIngredient");
+            const response = await axios.get("http://localhost:5231/api/Recipe/getAllApprovedIngredient");
             const ingredientsWithQuantity = response.data.$values.map(item => ({
                 ...item,
                 quantity: 0,
@@ -93,7 +116,31 @@ function ApplyEntry() {
         });
 
         try {
+            const newIngredients = selectedIngredients.filter(item =>
+                !ingredientList.some(existingIngredient => existingIngredient.name.toLowerCase() === item.name.toLowerCase())
+            );
+
+            let addedIngredients = [];
+
+            if (newIngredients.length > 0) {
+                const response = await axios.post("http://localhost:5231/api/Recipe/addNewIngredients",
+                    newIngredients.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        unit: item.unit,
+                        isApproved: false
+                    }))
+                );
+                addedIngredients = response.data.$values;
+            }
+
+            const updatedSelectedIngredients = selectedIngredients.map(item => {
+                const newIngredient = addedIngredients.find(ing => ing.name.toLowerCase() === item.name.toLowerCase());
+                return newIngredient ? { ...item, idIngredient: newIngredient.idIngredient } : item;
+            });
+
             const descriptionText = description.getCurrentContent().getPlainText();
+
             await axios.post("http://localhost:5231/api/Recipe/addRecipe", {
                 Name: name.trim(),
                 Description: descriptionText,
@@ -103,11 +150,11 @@ function ApplyEntry() {
                 ContestId: id
             });
 
-            const response = await axios.get(`http://localhost:5231/api/Recipe/detailByName/${name.trim()}`);
-            const idRecipe = response.data.recipe.idRecipe;
+            const responseRecipe = await axios.get(`http://localhost:5231/api/Recipe/detailByName/${name.trim()}`);
+            const idRecipe = responseRecipe.data.recipe.idRecipe;
 
             await axios.put(`http://localhost:5231/api/Recipe/updateRecipeIngredients/${idRecipe}`, {
-                ingredients: selectedIngredients.map(item => ({
+                ingredients: updatedSelectedIngredients.map(item => ({
                     ingredientID: item.idIngredient,
                     quantity: item.quantity
                 }))
@@ -144,7 +191,6 @@ function ApplyEntry() {
         } else {
 
             const newIngredient = {
-                idIngredient: `temp-${Date.now()}`,
                 name: newIngredientName.trim(),
                 quantity: parseFloat(newIngredientQuantity),
                 unit: newIngredientUnit.trim(),
@@ -215,12 +261,12 @@ function ApplyEntry() {
                                 onChange={(e) => setNewIngredientQuantity(e.target.value)}
                                 className="entry-input-field"
                             />
-                            <input
-                                type="text"
-                                placeholder="Enter unit (e.g., grams, ml, tbsp)"
-                                value={newIngredientUnit}
-                                onChange={(e) => setNewIngredientUnit(e.target.value)}
-                                className="entry-input-field"
+                            <Select
+                                className="entry-select-unit"
+                                options={units}
+                                value={newIngredientUnit && { value: newIngredientUnit, label: newIngredientUnit }}
+                                onChange={(option) => setNewIngredientUnit(option.value)}
+                                placeholder="Select unit"
                             />
                             <button onClick={handleAddNewIngredient} className="entry-add-button">Add</button>
                         </div>}

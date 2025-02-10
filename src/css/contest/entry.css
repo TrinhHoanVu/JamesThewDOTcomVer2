@@ -135,6 +135,10 @@
     margin-bottom: 10px;
 }
 
+.entry-select-unit {
+    width: 100px;
+}
+
 /* Ingredient Card */
 .entry-ingredient-card {
     display: flex;
@@ -194,7 +198,6 @@
     align-items: center;
     gap: 10px;
     width: 100%;
-    max-width: 300px;
 }
 
 .entry-custom-ingredient input {
@@ -202,13 +205,13 @@
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    width: 192px;
+    height: 25px;
 }
 
 
 .entry-add-button {
     padding: 8px 12px;
-    background-color: #4CAF50;
+    background-color: #e67e22;
     color: white;
     border: none;
     cursor: pointer;
@@ -220,5 +223,5 @@
 }
 
 .entry-add-button:hover {
-    background-color: #45a049;
+    background-color: #e67e22;
 }
