@@ -39,14 +39,11 @@ function ContestDetail() {
         }
     }, [id]);
 
-    console.log(entryList)
-
     let userEntry, winnerEntry
 
     try {
         userEntry = entryList.find(entry => entry.account.idAccount === userLogged.idAccount);
         winnerEntry = entryList.find(entry => entry.idAccountPost === contest.winner.idAccount);
-        if (winnerEntry) console.log(winnerEntry)
     } catch (er) { console.log(er) }
 
     const fetchUser = async () => {
