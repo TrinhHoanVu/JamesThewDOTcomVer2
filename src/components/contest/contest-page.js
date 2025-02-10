@@ -45,10 +45,13 @@ const ContestPage = () => {
     return (
         <div className="contestdt-container">
             <div className="contestdt-details">
-                <div>
-                    <img src="/images/contestbanner.jpg" alt="" className="contestdt-image" />
-                    <h1 className="contest-title">Contest Competition</h1>
+                <div className="contestdt-details">
+                    <div style={{ position: "relative" }}>
+                        <img src="/images/contestbanner.jpg" alt="" className="contestdt-image" />
+                        <h1 className="contest-title">Cooking Competition</h1>
+                    </div>
                 </div>
+
                 <div className="contest-container">
                     <div className="contest-list">
                         {contests.length > 0 ? (

@@ -20,8 +20,11 @@ function ApplyEntry() {
     const [recipeNameList, setRecipeNameList] = useState([]);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [loadingPost, setLoadingPost] = useState(false);
+    const [newIngredientName, setNewIngredientName] = useState("");
+    const [newIngredientQuantity, setNewIngredientQuantity] = useState("");
+    const [newIngredientUnit, setNewIngredientUnit] = useState("");
+    const [showCustomIngredient, setShowCustomIngredient] = useState(false);
+
     const navigate = useNavigate();
     const editorRef = useRef();
 
@@ -124,6 +127,37 @@ function ApplyEntry() {
         }
     };
 
+    const handleAddNewIngredient = () => {
+        if (!newIngredientName.trim() || !newIngredientQuantity || newIngredientQuantity <= 0 || !newIngredientUnit.trim()) {
+            Swal.fire({ icon: "warning", title: "Invalid input", text: "Please enter a valid ingredient name, quantity, and unit." });
+            return;
+        }
+
+        const existingIngredient = selectedIngredients.find(item => item.name.toLowerCase() === newIngredientName.toLowerCase());
+
+        if (existingIngredient) {
+            setSelectedIngredients(selectedIngredients.map(item =>
+                item.name.toLowerCase() === newIngredientName.toLowerCase()
+                    ? { ...item, quantity: parseFloat(item.quantity) + parseFloat(newIngredientQuantity) }
+                    : item
+            ));
+        } else {
+
+            const newIngredient = {
+                idIngredient: `temp-${Date.now()}`,
+                name: newIngredientName.trim(),
+                quantity: parseFloat(newIngredientQuantity),
+                unit: newIngredientUnit.trim(),
+            };
+
+            setSelectedIngredients([...selectedIngredients, newIngredient]);
+        }
+
+        setNewIngredientName("");
+        setNewIngredientQuantity("");
+        setNewIngredientUnit("");
+    };
+
     return (
         <div className="entry-container">
             <div className="entry-header">
@@ -137,13 +171,6 @@ function ApplyEntry() {
                     {errors.name && <span style={{ color: "red" }}>{errors.name}</span>}
                     <br />
 
-                    <label className="entry-label">Status:</label>
-                    <select className="entry-input-field" value={isPublic ? "true" : "false"} onChange={(e) => setIsPublic(e.target.value === "true")}>
-                        <option value="true">Public</option>
-                        <option value="false">Private</option>
-                    </select>
-                    <br />
-
                     <label className="entry-label">Cooking Procedure:</label>
                     <div className="entry-editor-container" onClick={() => editorRef.current.focus()}>
                         <Editor ref={editorRef} editorState={description} onChange={setDescription} />
@@ -155,20 +182,56 @@ function ApplyEntry() {
                     <div className="entry-ingredient-section">
                         <Select
                             className="entry-select-ingredient"
-                            options={ingredientList.map(ingredient => ({
-                                value: ingredient.name,
-                                label: ingredient.name,
-                            }))}
-                            onChange={(selectedOption) => handleIngredientSelect(selectedOption.value)}
-                            placeholder="Select an ingredient"
+                            options={[
+                                ...ingredientList.map(ingredient => ({
+                                    value: ingredient.name,
+                                    label: ingredient.name,
+                                })),
+                                { value: "Other", label: "Other" },
+                            ]}
+                            onChange={(selectedOption) => {
+                                if (selectedOption.value === "Other") {
+                                    setShowCustomIngredient(true);
+                                } else {
+                                    handleIngredientSelect(selectedOption.value);
+                                    setShowCustomIngredient(false);
+                                }
+                            }} placeholder="Select an ingredient"
                             isSearchable={true}
                         />
+                        {showCustomIngredient && <div className="entry-custom-ingredient">
+                            <input
+                                type="text"
+                                placeholder="Enter ingredient name"
+                                value={newIngredientName}
+                                onChange={(e) => setNewIngredientName(e.target.value)}
+                                className="entry-input-field"
+                            />
+                            <input
+                                type="number"
+                                min="1"
+                                placeholder="Enter quantity"
+                                value={newIngredientQuantity}
+                                onChange={(e) => setNewIngredientQuantity(e.target.value)}
+                                className="entry-input-field"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Enter unit (e.g., grams, ml, tbsp)"
+                                value={newIngredientUnit}
+                                onChange={(e) => setNewIngredientUnit(e.target.value)}
+                                className="entry-input-field"
+                            />
+                            <button onClick={handleAddNewIngredient} className="entry-add-button">Add</button>
+                        </div>}
                     </div>
+                    <br />
                     <div className="ingredient-card-wrapper">
                         {selectedIngredients.length > 0 && selectedIngredients.map((ingredient, index) => (
                             <IngredientCard key={index} name={ingredient.name} handleIngredientRemove={handleIngredientRemove} />
                         ))}
                     </div>
+                    <br />
                     {selectedIngredients.length > 0 && (
                         <div className="entry-ingredient-table-wrapper">
                             <table className="entry-ingredient-table">
