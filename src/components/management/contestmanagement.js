@@ -148,10 +148,10 @@ function ContestManagement() {
         }
     }, [contests]);
 
-    const handleEdit = (contestId, status) => {
+    const handleEdit = (contestId, status, participantNumber) => {
         try {
-            const statusContest = ["NOT YET", "HAPPENING"];
-            if (statusContest.includes(status.toUpperCase())) {
+            const statusContest = ["NOT YET"];
+            if (participantNumber === 0 || !participantNumber) {
                 setIdContest(contestId);
                 setContestEdit(true);
             } else {
@@ -166,9 +166,9 @@ function ContestManagement() {
         }
     };
 
-    const handleDelete = async (contestId, status, name) => {
+    const handleDelete = async (contestId, status, name, participantNumber) => {
         try {
-            if (status.toUpperCase() === "NOT YET") {
+            if (participantNumber === 0 || !participantNumber) {
                 Swal.fire({
                     title: `Delete ${name}?`,
                     text: "You won't be able to revert this!",
@@ -257,7 +257,7 @@ function ContestManagement() {
                                         {contest.price !== null && contest.price !== undefined ? contest.price.toFixed(2) : "N/A"}
                                     </td>
                                     <td style={{ cursor: "pointer", textAlign: "right" }} onClick={() => handleAttendeesDetail(contest.idContest)}>
-                                        <span>{attendeesCount[contest.idContest] || 0}</span>
+                                        <span>{attendeesCount[contest.idContest]}</span>
                                     </td>
                                     <td className={`status ${contest.status ? "active" : "inactive"}`} style={{ textAlign: "right" }}>
                                         {contest.status}
@@ -272,13 +272,13 @@ function ContestManagement() {
                                             <>
                                                 <FaEdit
                                                     className="contest-action-icon edit-icon"
-                                                    onClick={() => handleEdit(contest.idContest, contest.status)}
+                                                    onClick={() => handleEdit(contest.idContest, contest.status, attendeesCount[contest.idContest])}
                                                     title="Edit"
                                                     style={{ cursor: "pointer" }}
                                                 />
                                                 <FaTrash
                                                     className="contest-action-icon delete-icon"
-                                                    onClick={() => handleDelete(contest.idContest, contest.status, contest.name)}
+                                                    onClick={() => handleDelete(contest.idContest, contest.status, contest.name, attendeesCount[contest.idContest])}
                                                     title="Delete"
                                                     style={{ cursor: "pointer", marginLeft: "20px" }}
                                                 />

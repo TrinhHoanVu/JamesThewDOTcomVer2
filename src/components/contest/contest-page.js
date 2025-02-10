@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../css/contest/contest-page.css";
+import { FaTimes } from "react-icons/fa";
 
 const ContestPage = () => {
     const [contests, setContests] = useState([]);
     const [total, setTotal] = useState(0);
     const [pageNumber, setPageNumber] = useState(1);
     const [pageSize] = useState(10);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedStatus, setSelectedStatus] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -42,24 +45,61 @@ const ContestPage = () => {
         }
     };
 
+    const filteredContests = contests.filter((contest) =>
+        contest.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        (selectedStatus === "" || contest.status.toLowerCase() === selectedStatus.toLowerCase())
+    );
+
+    const handleClearSearch = () => {
+        setSearchQuery("");
+    };
+
     return (
         <div className="contestdt-container">
             <div className="contestdt-details">
-                <div className="contestdt-details">
-                    <div style={{ position: "relative" }}>
-                        <img src="/images/contestbanner.jpg" alt="" className="contestdt-image" />
-                        <h1 className="contest-title">Cooking Competition</h1>
-                    </div>
+                <div style={{ position: "relative" }}>
+                    <img src="/images/contestbanner.jpg" alt="" className="contestdt-image" />
+                    <h1 className="contest-title">Cooking Competition</h1>
                 </div>
 
+
                 <div className="contest-container">
+                    <div style={{ width: "500px", margin: "0 auto" }}>
+                        <div style={{
+                            display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "500px"
+                        }}>
+                            <select
+                                value={selectedStatus}
+                                onChange={(e) => setSelectedStatus(e.target.value)}
+                                className="status-filter"
+                            >
+                                <option value="">All</option>
+                                <option value="Not Yet">Not Yet</option>
+                                <option value="Happening">Happening</option>
+                                <option value="Finished">Finished</option>
+                            </select>
+                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "10px" }}>
+                                <input
+                                    type="text"
+                                    placeholder="Search tips..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="search-input"
+                                    style={{ width: "150px", height: "30px" }}
+                                />
+                                {searchQuery && <FaTimes
+                                    style={{ fontSize: "25px", cursor: "pointer", borderRadius: "50%", border: "1px black" }}
+                                    onClick={() => handleClearSearch()} />}
+                            </div>
+                        </div>
+                    </div>
+                    <br /><br />
                     <div className="contest-list">
-                        {contests.length > 0 ? (
-                            contests.map((contest) => (
-                                <ContestCard key={contest.idContest} contest={contest} onViewDetails={handleViewDetails} />
-                            ))
+                        {filteredContests.length > 0 ? (
+                            filteredContests.map((contest) => (
+                                <ContestCard key={contest.idContest} contest={contest} onViewDetails={handleViewDetails} />))
                         ) : (
-                            <p>No contests available.</p>
+                            <p>No Tips available.</p>
                         )}
                     </div>
 
@@ -113,7 +153,7 @@ const ContestCard = ({ contest, onViewDetails }) => {
                 </span>
             </div>
         );
-    } catch (err) { console.log(err) }
+    } catch (err) { console.log(err); }
 };
 
 export default ContestPage;
