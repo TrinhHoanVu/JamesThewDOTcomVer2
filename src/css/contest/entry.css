@@ -175,7 +175,7 @@
 }
 
 .entry-ingredient-table-wrapper {
-    max-height: 260px;
+    max-height: 200px;
     overflow-y: auto;
     overflow-x: hidden;
     border: 1px solid #ddd;
@@ -187,4 +187,38 @@
     padding: 8px;
     border: 1px solid #ddd;
     text-align: left;
+}
+
+.entry-custom-ingredient {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.entry-custom-ingredient input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 192px;
+}
+
+
+.entry-add-button {
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    height: 36px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.entry-add-button:hover {
+    background-color: #45a049;
 }
