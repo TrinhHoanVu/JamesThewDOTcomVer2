@@ -1,0 +1,190 @@
+.entry-container {
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(to top, rgba(255, 126, 95, 0.5), #ffffff);
+    padding: 20px;
+    font-family: "Arial", sans-serif;
+}
+
+.entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 0;
+}
+
+.entry-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.entry-back-button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #ff5722;
+    transition: color 0.3s ease;
+}
+
+.entry-back-button:hover {
+    color: #d84315;
+}
+
+.entry-content {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+.entry-left-panel,
+.entry-right-panel {
+    flex: 1;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    height: 70vh;
+}
+
+.entry-label {
+    font-weight: bold;
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 5px;
+}
+
+.entry-input-field {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background: #f9f9f9;
+    transition: border 0.3s ease;
+}
+
+.entry-ingredient-table input {
+    width: 80%;
+    /* max-width: 100px; */
+    padding: 4px;
+    text-align: center;
+}
+
+.entry-input-field:focus {
+    border: 1px solid #ff5722;
+    outline: none;
+}
+
+.entry-editor-container {
+    border: 1px solid #ddd;
+    height: 300px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.entry-ingredient-section {
+    margin-top: 20px;
+}
+
+.entry-ingredient-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    max-width: 100%;
+}
+
+.entry-ingredient-table th,
+.entry-ingredient-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.entry-ingredient-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.entry-save-button {
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.entry-save-button:hover {
+    background-color: #e64a19;
+}
+
+.entry-select-ingredient {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Ingredient Card */
+.entry-ingredient-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.entry-ingredient-card p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.entry-ingredient-card .entry-delete-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.entry-ingredient-card .entry-delete-button:hover {
+    background-color: #d32f2f;
+}
+
+.entry-ingredient-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.entry-ingredient-table-wrapper {
+    max-height: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #ddd;
+    padding: 5px;
+}
+
+.entry-ingredient-table th,
+.entry-ingredient-table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}

@@ -98,8 +98,7 @@ const TipsPage = () => {
     };
 
     const filteredTips = tips.filter((tip) =>
-        tip.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (tip.decription && tip.decription.toLowerCase().includes(searchQuery.toLowerCase()))
+        tip.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const handleClearSearch = () => {
@@ -118,7 +117,7 @@ const TipsPage = () => {
                         display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "500px"
                     }}>
                         <button className="compare-button-2" onClick={() => createOwnTip()}>
-                            Create Your Own Tips
+                            Create Your Tips
                         </button>
                         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "10px" }}>
                             <input
@@ -127,7 +126,7 @@ const TipsPage = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="search-input"
-                                style={{ width: "200px", height: "40px" }}
+                                style={{ width: "150px", height: "30px" }}
                             />
                             {searchQuery && <FaTimes
                                 style={{ fontSize: "25px", cursor: "pointer", borderRadius: "50%", border: "1px black" }}
@@ -166,7 +165,7 @@ const TipsPage = () => {
                 {addTipTable && (
                     <div className="edit-modal-overlay">
                         <div className="edit-modal">
-                            <AddTip onClose={() => setAddTipTable(false)} IsApproved={false} title="Add tip successfully! Please wait for approving!"/>
+                            <AddTip isUser={true} onClose={() => setAddTipTable(false)} IsApproved={false} title="Add tip successfully! Please wait for approving!" />
                             <button className="close-modal-button" onClick={() => setAddTipTable(false)}>
                                 Close
                             </button>

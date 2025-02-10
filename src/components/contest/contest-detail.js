@@ -203,6 +203,7 @@ function ContestDetail() {
                             </p>
                         </div>
                     </div>
+                    <br /><br />
                     <div className="cmtForm-container" style={{ width: "1000px", margin: "0 auto" }}>
                         <div style={{ display: 'flex', justifyContent: "space-between", width: "960px" }}>
                             <h3 className="cmtForm-header" style={{ fontSize: "45px" }}>Participants' Entries</h3>
@@ -274,11 +275,7 @@ function ContestDetail() {
                                     </div>
                                 ))}
                         </div>
-
-
                     </div>
-                    <br /><br /><br /><br />
-
                     {/* <CommentForm contestId={id} contest={contest} /> */}
                 </div>
             ) : <NotFoundPage />}

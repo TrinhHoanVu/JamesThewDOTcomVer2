@@ -5,7 +5,7 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 import { DataContext } from "../../context/DatabaseContext";
 
-function AddTip({ onClose, reloadTips, IsApproved, title = 'Add tip successfully!' }) {
+function AddTip({ isUser, onClose, reloadTips, IsApproved, title = 'Add tip successfully!' }) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState(() => EditorState.createEmpty());
     const [tipNameList, setTipNameList] = useState([]);
@@ -130,7 +130,7 @@ function AddTip({ onClose, reloadTips, IsApproved, title = 'Add tip successfully
                     />
                     {errors.name && <span style={{ color: "red" }}>{errors.name}</span>}
                 </div>
-                <div style={{ marginBottom: "45px", height: "50px" }}>
+                {!isUser && <div style={{ marginBottom: "45px", height: "50px" }}>
                     <label htmlFor="status">Status:</label>
                     <select
                         id="status"
@@ -141,8 +141,8 @@ function AddTip({ onClose, reloadTips, IsApproved, title = 'Add tip successfully
                         <option value="true">Public</option>
                         <option value="false">Private</option>
                     </select>
-                </div>
-
+                </div>}
+                {console.log("user" + isUser)}
                 <div style={{
                     marginBottom: "15px", display: "flex",
                     justifyContent: "center", flexDirection: "column", gap: "20px"
