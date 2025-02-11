@@ -289,6 +289,7 @@ function Entry() {
             });
 
             Swal.fire({ icon: 'success', title: 'Recipe updated successfully!', timer: 1500 });
+            navigate(`/contest/${id}`);
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'Failed to update recipe', text: 'Please try again later.' });
         } finally {

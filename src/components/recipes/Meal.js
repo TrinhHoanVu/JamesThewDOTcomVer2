@@ -28,7 +28,6 @@ const Meal = () => {
             <div className="main">
                 <div className="heading">
                     <h1>Search Your Food Recipe</h1>
-                    <h4>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque tempore unde sed ducimus voluptates illum!</h4>
                 </div>
                 <div className="searchBox">
                     <input type="search" className="search-bar" onChange={e => setSearch(e.target.value)} onKeyPress={searchRecipe} />

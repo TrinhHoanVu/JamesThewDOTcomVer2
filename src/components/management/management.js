@@ -101,6 +101,7 @@ const Management = () => {
   const logOut = () => {
     localStorage.removeItem("inforToken");
     navigate("/login")
+    window.location.reload()
   }
   return (
     <div className="manage-panel">
@@ -110,7 +111,7 @@ const Management = () => {
           <div className="management-item" onClick={handleChangeProfile}>Profile</div>
           <div className="management-item" onClick={handleChangePassword}>Password</div>
           {tokenInfor.role !== "USER" && (<div className="management-item" onClick={handleChangeContest}>Contest</div>)}
-          {tokenInfor.role !== "USER" && (<div className="management-item" onClick={handleChangeRecipe}>Recipe</div>)}
+          {/* {tokenInfor.role !== "USER" && (<div className="management-item" onClick={handleChangeRecipe}>Recipe</div>)} */}
           {tokenInfor.role !== "USER" && (<div className="management-item" onClick={handleChangeTip}>Tip</div>)}
           <div className="management-item" onClick={logOut}>Log out</div>
         </div>
@@ -119,7 +120,7 @@ const Management = () => {
         {profileStatus && (<div><AccountDetail /></div>)}
         {passwordStatus && (<div><PasswordManagement /></div>)}
         {contestStatus && (<div><ContestManagement /></div>)}
-        {recipeStatus && (<div><RecipeManagement /></div>)}
+        {/* {recipeStatus && (<div><RecipeManagement /></div>)} */}
         {tipStatus && (<div><TipManagement /></div>)}
       </div>
     </div>

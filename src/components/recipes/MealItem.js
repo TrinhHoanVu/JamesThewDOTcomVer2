@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 const MealItem = ({ data }) => {
     console.log(data);
+    const [userRole, seUserRole] = useState();
     let navigate = useNavigate();
-    const storedToken = JSON.parse(localStorage.getItem("inforToken"));
-    const user = jwtDecode(storedToken.token)
-    const userRole = user ? user.role : null; 
+
+    try {
+
+        const storedToken = JSON.parse(localStorage.getItem("inforToken"));
+        const user = jwtDecode(storedToken.token)
+        seUserRole(user ? user.role : "");
+    } catch (er) { console.log(er) }
     return (
         <>
             {

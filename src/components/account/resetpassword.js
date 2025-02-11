@@ -27,7 +27,7 @@ const ResetPassword = () => {
                 { withCredentials: true, }
             );
 
-            navigate("/homepage")
+            navigate("/")
 
         } catch (error) {
             const errorMessage = error.response?.data.message || "An error occurred. Please try again.";
