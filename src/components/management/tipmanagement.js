@@ -72,8 +72,8 @@ function TipManagement() {
                 setTimeout(() => {
                     $("#contestTable").DataTable({
                         destroy: true,
-                        pageLength: 5,
-                        lengthMenu: [5, 10],
+                        pageLength: 3,
+                        lengthMenu: [3],
                     });
                 }, 500);
             }

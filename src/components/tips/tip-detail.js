@@ -45,7 +45,7 @@ function TipDetail() {
             }
         } catch (error) {
             console.log(error);
-            showLoginAlert();
+            // showLoginAlert();
         }
     };
 
@@ -87,7 +87,15 @@ function TipDetail() {
     }
 
     const userRole = user?.role;
-    if (userRole === "SUPERADMIN" || userRole === "ADMIN") {
+    const isPublic = tip?.isPublic;
+
+    const navigateToLogin = () => {
+        try {
+            navigate(".login")
+        } catch (err) { console.log(err) }
+    }
+
+    if (isPublic) {
         return (
             <div className="contestdt-container">
                 <div className="contestdt-details">
@@ -102,32 +110,30 @@ function TipDetail() {
         );
     }
 
-    if (userRole === "USER") {
+    if (!user) {
         return (
-            <div className="contestdt-container">
-                {user?.status ? (
-                    <div className="contestdt-details">
-                        <img src={tip.images} alt={tip.name} className="contestdt-image" />
-                        <h1 className="contestdt-title">{tip.name}</h1>
-                        <div className="contestdt-info">
-                            <p className="contestdt-description">{renderDescription(description)}</p>
-                            <span>Posted by: {tip.account.name}</span>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="contestdt-details center-text">
-                        <p>
-                            This page is for members only. You need to register to view the content. <br />
-                            Click <span style={{ color: "orange", cursor: "pointer" }} onClick={handlePayment}>here</span> to register.
-                        </p>
-                    </div>
-                )}
+            <div className="contestdt-container center-text">
+                <p>
+                    This content is private. Please <span style={{ color: "orange", cursor: "pointer" }} onClick={navigateToLogin}>log in</span> to continue.
+                </p>
+            </div>
+        );
+    }
+
+    if (!user?.status) {
+        return (
+            <div className="contestdt-container center-text">
+                <p>
+                    This page is for members only. You need to register to view the content. <br />
+                    Click <span style={{ color: "orange", cursor: "pointer" }} onClick={handlePayment}>here</span> to register.
+                </p>
+
                 {payment && (
                     <div>
                         <div className="overlay"></div>
                         <div className="cmtForm-payment-box">
-                            <button className="cmtForm-close-button" onClick={() => handleBackToTipPage()}>✖</button>
-                            <h4 className="cmtForm-message">Your account is not active. Please subscribe to comment.</h4>
+                            <button className="cmtForm-close-button" onClick={handleBackToTipPage}>✖</button>
+                            <h4 className="cmtForm-message">Your account is not active. Please subscribe to view the content.</h4>
                             <PaymentForm user={user} />
                         </div>
                     </div>
@@ -136,7 +142,19 @@ function TipDetail() {
         );
     }
 
-    return null;
+    return (
+        <div className="contestdt-container">
+            <div className="contestdt-details">
+                <img src={tip.images} alt={tip.name} className="contestdt-image" />
+                <h1 className="contestdt-title">{tip.name}</h1>
+                <div className="contestdt-info">
+                    <p className="contestdt-description">{renderDescription(description)}</p>
+                    <span>Posted by: {tip.account.name}</span>
+                </div>
+            </div>
+        </div>
+    );
+
 }
 
 export default TipDetail;
