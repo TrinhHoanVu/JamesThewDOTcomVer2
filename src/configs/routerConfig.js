@@ -20,6 +20,7 @@ import Recipe from "../components/recipes/Recipe"
 import Entry from "../components/contest/entry"
 import AddRecipe from "../components/recipes/add-recipe"
 import ApplyEntry from "../components/recipes/apply-entry"
+import RecipeEdit from "../components/recipes/RecipeEdit"
 
 const publicRouter = [
     {
@@ -81,9 +82,12 @@ const publicRouter = [
     {
         path: "/contest/:id/applyEntry",
         element: <ApplyEntry />
+    },
+    {
+        path: "/recipe-edit/:id",
+        element: <RecipeEdit />
     }
 ]
-
 
 const privateRouter = [
     {
