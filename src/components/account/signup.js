@@ -63,7 +63,7 @@ const SignUp = () => {
                 if (res.status === 200)
                     navigate("/confirmcode", {
                         state: {
-                            linkNavigate: "/login",
+                            linkNavigate: "/",
                             name: name,
                             email: email,
                             password: password

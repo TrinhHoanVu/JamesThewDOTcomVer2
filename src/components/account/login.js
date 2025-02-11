@@ -31,13 +31,14 @@ const Login = () => {
             if (allowedRoles.includes(tokenDecode.role)) {
               if (from === "/") {
                 navigate("/management", { state: { isProfile: true, isContest: false, isRecipe: false, isTip: false } });
+                window.location.reload()
               } else {
                 navigate(from)
               }
             } else {
               navigate(from)
             }
-
+            window.location.reload()
           }
         })
         .catch(err => {

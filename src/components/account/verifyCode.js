@@ -23,7 +23,7 @@ const VerifyCode = () => {
                     withCredentials: true
                 }
             );
-            if (linkNavigate === "/login") {
+            if (linkNavigate === "/") {
                 try {
                     await axios.post("http://localhost:5231/api/Account/register", { email: email, name: name, password: password, cfPassword: password })
                 } catch (error) {
