@@ -62,11 +62,12 @@ function PasswordManagement() {
 
             if (Object.keys(validationErrors).length > 0) return;
 
+            console.log(newPassword)
 
             await axios.put(`http://localhost:5231/api/Account/ChangePasswordWithoutCode`, {
                 email: tokenInfor.email,
-                currentPassword,
-                newPassword
+                NewPass: newPassword,
+                NewPassCf: confirmNewPassword
             });
             Swal.fire({
                 icon: 'success',
