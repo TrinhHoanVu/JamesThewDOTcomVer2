@@ -148,10 +148,10 @@ function ContestManagement() {
         }
     }, [contests]);
 
-    const handleEdit = (contestId, status) => {
+    const handleEdit = (contestId, status, participantNumber) => {
         try {
-            const statusContest = ["NOT YET", "HAPPENING"];
-            if (statusContest.includes(status.toUpperCase())) {
+            const statusContest = ["NOT YET"];
+            if (participantNumber === 0 || !participantNumber) {
                 setIdContest(contestId);
                 setContestEdit(true);
             } else {
@@ -166,9 +166,9 @@ function ContestManagement() {
         }
     };
 
-    const handleDelete = async (contestId, status, name) => {
+    const handleDelete = async (contestId, status, name, participantNumber) => {
         try {
-            if (status.toUpperCase() === "NOT YET") {
+            if (participantNumber === 0 || !participantNumber) {
                 Swal.fire({
                     title: `Delete ${name}?`,
                     text: "You won't be able to revert this!",
@@ -272,13 +272,13 @@ function ContestManagement() {
                                             <>
                                                 <FaEdit
                                                     className="contest-action-icon edit-icon"
-                                                    onClick={() => handleEdit(contest.idContest, contest.status)}
+                                                    onClick={() => handleEdit(contest.idContest, contest.status, attendeesCount[contest.idContest])}
                                                     title="Edit"
                                                     style={{ cursor: "pointer" }}
                                                 />
                                                 <FaTrash
                                                     className="contest-action-icon delete-icon"
-                                                    onClick={() => handleDelete(contest.idContest, contest.status, contest.name)}
+                                                    onClick={() => handleDelete(contest.idContest, contest.status, contest.name, attendeesCount[contest.idContest])}
                                                     title="Delete"
                                                     style={{ cursor: "pointer", marginLeft: "20px" }}
                                                 />

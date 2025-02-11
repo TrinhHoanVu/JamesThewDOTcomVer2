@@ -17,6 +17,7 @@ function ContestEditForm({ idContest, onClose, reloadContests }) {
     const [initialDescription, setInitialDescription] = useState(() => EditorState.createEmpty());
     const [initialPrice, setInitialPrice] = useState(0);
     const [initialEndDate, setInitialEndDate] = useState("");
+    const [initialStartDate, setInitialStartDate] = useState("");
     const [contestNameList, setContestNameList] = useState([]);
 
 
@@ -53,6 +54,7 @@ function ContestEditForm({ idContest, onClose, reloadContests }) {
             setInitialName(contest.name);
             setInitialDescription(contest.description);
             setInitialPrice(contest.price);
+            setInitialStartDate(contest.startDate)
             setInitialEndDate(contest.endDate);
             setInitialStatus(contest.status);
 
@@ -134,24 +136,47 @@ function ContestEditForm({ idContest, onClose, reloadContests }) {
 
     const validate = () => {
         const errors = {};
+
         try {
-            if (!name.trim()) errors.name = "Name is required.";
-            if (contestNameList.includes(name)) errors.name = "This name has already been taken.";
-            if (!description.getCurrentContent().hasText()) errors.description = "Description is required.";
-            if (price < 0) errors.price = "Price must be greater than or equal to 0.";
-            if (!startDate) errors.startDate = "Start date is required.";
-            if (!endDate) errors.endDate = "End date is required.";
+            if (name.trim() !== initialName && contestNameList.includes(name)) {
+                errors.name = "This name has already been taken.";
+            }
+
+            if (name.trim() !== initialName && !name.trim()) {
+                errors.name = "Name is required.";
+            }
+
+            if (!description.getCurrentContent().hasText() &&
+                description.getCurrentContent().getPlainText() !== initialDescription) {
+                errors.description = "Description is required.";
+            }
+
+            if (price < 0 && price !== initialPrice) {
+                errors.price = "Price must be greater than or equal to 0.";
+            }
 
             const start = new Date(startDate).getTime();
             const end = new Date(endDate).getTime();
             const now = Date.now();
 
-            if (start < now) errors.startDate = "Start date must be in the future.";
-            if (end < now) errors.endDate = "End date must be in the future.";
-            if (start >= end) errors.endDate = "End date must be after the start date.";
-        } catch (err) { console.log(err) }
+            if (start < now && startDate !== initialStartDate) {
+                errors.startDate = "Start date must be in the future.";
+            }
+
+            if (end < now && endDate !== initialEndDate) {
+                errors.endDate = "End date must be in the future.";
+            }
+
+            if (start >= end && (startDate !== initialStartDate || endDate !== initialEndDate)) {
+                errors.endDate = "End date must be after the start date.";
+            }
+        } catch (err) {
+            console.log(err);
+        }
+
         return errors;
     };
+
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -162,64 +187,71 @@ function ContestEditForm({ idContest, onClose, reloadContests }) {
                 setErrors(validationErrors);
                 return;
             }
-            try {
-                const descriptionText = description.getCurrentContent().getPlainText();
-                setLoadingPost(true)
-                await axios.put(`http://localhost:5231/api/Contest/update/${idContest}`, {
-                    name,
-                    description: descriptionText,
-                    price,
-                    startDate,
-                    endDate,
-                    status,
-                });
 
-                let subject;
-                let body;
-
-                if (initialStatus === "NOT YET" && status === "HAPPENING") {
-                    subject = name + " is coming"
-                    body = name + "\n" + descriptionText + "\n" + price + "\n" + formatDateText(startDate) + "\n" + formatDateText(endDate)
-                    await axios.post("http://localhost:5231/api/Contest/sendNewContest", {
-                        To: "",
-                        subject: subject,
-                        Body: body
-                    })
-                } else if (initialStatus === "HAPPENING" && status === "HAPPENING") {
-                    subject = name + " has been updated"
-                    body = name + "\n\n" + descriptionText + "\nPrice: $" + price + "\nFrom: " + formatDateText(startDate) + " To " + formatDateText(endDate)
-                    await axios.post("http://localhost:5231/api/Contest/sendNewContest", {
-                        To: "",
-                        subject,
-                        Body: body
-                    });
+            Swal.fire({
+                title: 'Saving...',
+                text: 'Please wait while we update the contest.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
+            });
 
-                setLoadingPost(false)
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Contest updated successfully!',
-                    showConfirmButton: false,
-                    timer: 1500
+            const descriptionText = description.getCurrentContent().getPlainText();
+
+            await axios.put(`http://localhost:5231/api/Contest/update/${idContest}`, {
+                name,
+                description: descriptionText,
+                price,
+                startDate,
+                endDate,
+                status,
+            });
+
+            let subject, body;
+
+            if (initialStatus === "NOT YET" && status === "HAPPENING") {
+                subject = `${name} is coming`;
+                body = `${name}\n${descriptionText}\nPrice: $${price}\nFrom: ${formatDateText(startDate)} To: ${formatDateText(endDate)}`;
+
+                await axios.post("http://localhost:5231/api/Contest/sendNewContest", {
+                    To: "",
+                    subject,
+                    Body: body
                 });
+            } else if (initialStatus === "HAPPENING" && status === "HAPPENING") {
+                subject = `${name} has been updated`;
+                body = `${name}\n\n${descriptionText}\nPrice: $${price}\nFrom: ${formatDateText(startDate)} To ${formatDateText(endDate)}`;
 
-
-                if (reloadContests) {
-                    await reloadContests();
-                }
-                if (onClose) {
-                    onClose();
-                }
-            } catch (err) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Failed to update contest',
-                    text: 'Please try again later.',
+                await axios.post("http://localhost:5231/api/Contest/sendNewContest", {
+                    To: "",
+                    subject,
+                    Body: body
                 });
-
             }
-        } catch (er) { console.log(er) }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Contest updated successfully!',
+                showConfirmButton: false,
+                timer: 1500
+            });
+
+            if (reloadContests) {
+                await reloadContests();
+            }
+            if (onClose) {
+                onClose();
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed to update contest',
+                text: 'Please try again later.',
+            });
+        }
     };
+
 
     useEffect(() => {
         try {
@@ -294,9 +326,22 @@ function ContestEditForm({ idContest, onClose, reloadContests }) {
                         onChange={(e) => setStatus(e.target.value)}
                         style={{ width: "100%", padding: "8px", margin: "5px 0" }}
                     >
-                        <option value="NOT YET">NOT YET</option>
-                        <option value="HAPPENING">HAPPENING</option>
-                        <option value="FINISHED">FINISHED</option>
+                        {initialStatus === "NOT YET" && (
+                            <>
+                                <option value="NOT YET">NOT YET</option>
+                                <option value="HAPPENING">HAPPENING</option>
+                            </>
+                        )}
+                        {initialStatus === "HAPPENING" && (
+                            <>
+                                <option value="NOT YET">NOT YET</option>
+                                <option value="HAPPENING">HAPPENING</option>
+                                <option value="FINISHED">FINISHED</option>
+                            </>
+                        )}
+                        {initialStatus === "FINISHED" && (
+                            <option value="FINISHED">FINISHED</option>
+                        )}
                     </select>
                     {errors.status && <span style={{ color: "red" }}>{errors.status}</span>}
                 </div>

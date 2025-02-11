@@ -124,38 +124,52 @@ function Evaluation() {
 
         setCheckedState((prevState) => {
             const updatedState = [...prevState];
-            updatedState[index] = !prevState[index];
+            updatedState[index] = !prevState[index]; // Đảo trạng thái chọn/bỏ chọn
             return updatedState;
         });
 
         setSelectedComments((prevSelectedComments) => {
-            let updatedComments;
+            let updatedComments = [...prevSelectedComments];
 
-            try {
-                const isRecipeSelected = prevSelectedComments.some(
-                    (comment) => comment.name === recipe.name
+            const isRecipeSelected = updatedComments.some(
+                (comment) => comment.name === recipe.name
+            );
+
+            if (isRecipeSelected) {
+                // Nếu đã chọn rồi thì bỏ chọn
+                updatedComments = updatedComments.filter(
+                    (comment) => comment.name !== recipe.name
                 );
+            } else {
+                // Nếu chưa chọn thì thêm vào danh sách
+                updatedComments.push(recipe);
+                if (updatedComments.length > 3) {
+                    // Nếu có hơn 3 mục, xóa mục đầu tiên
+                    const removedItem = updatedComments.shift();
 
-                if (isRecipeSelected) {
-                    updatedComments = prevSelectedComments.filter(
-                        (comment) => comment.name !== recipe.name
-                    );
-                } else {
-                    updatedComments = [...prevSelectedComments, recipe];
-                    if (updatedComments.length > 3) updatedComments = updatedComments.slice(1);
+                    // Cập nhật trạng thái dấu tích cho mục bị xóa
+                    setCheckedState((prevState) => {
+                        const updatedState = [...prevState];
+                        const removedIndex = attendeesList.findIndex(
+                            (attendee) => attendee.name === removedItem.name
+                        );
+                        if (removedIndex !== -1) {
+                            updatedState[removedIndex] = false;
+                        }
+                        return updatedState;
+                    });
                 }
+            }
 
-                if (updatedComments.length === 0) {
-                    setTableCompare(false);
-                }
-
-            } catch (err) {
-                console.log(err);
+            // Ẩn bảng so sánh nếu không có mục nào được chọn
+            if (updatedComments.length === 0) {
+                setTableCompare(false);
             }
 
             return updatedComments;
         });
     };
+
 
     const handleClear = () => {
         setTableCompare(false);
