@@ -230,14 +230,14 @@ function Entry() {
                 return;
             }
 
-            // Swal.fire({
-            //     title: "Saving...",
-            //     text: "Please wait while we save the recipe.",
-            //     allowOutsideClick: false,
-            //     didOpen: () => {
-            //         Swal.showLoading();
-            //     }
-            // });
+            Swal.fire({
+                title: "Saving...",
+                text: "Please wait while we save the recipe.",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
 
             const newIngredients = selectedIngredients.filter(item =>
@@ -310,11 +310,28 @@ function Entry() {
             });
             if (result.isConfirmed) {
                 try {
-                    // await axios.delete(`http://localhost:5231/api/Recipe/deleteRecipe/${idRecipe}`);
+                    const unApprovedIngredients = initialIngredientList.filter(item => !item.isApproved)
+                    const unapprovedIngredientIds = unApprovedIngredients.map(item => item.idIngredient);
+
+                    if (unapprovedIngredientIds.length > 0)
+                        await axios.delete('http://localhost:5231/api/Recipe/DeleteUnapprovedIngredients', {
+                            data: unapprovedIngredientIds
+                        });
+
+                    await axios.delete(`http://localhost:5231/api/Recipe/DeleteByRecipeId/${idRecipe}`)
+
+                    await axios.delete(`http://localhost:5231/api/Recipe/deleteParticipant`, {
+                        params: {
+                            idContest: id,
+                            idAccount: idAccountPost
+                        }
+                    });
+
+                    await axios.delete(`http://localhost:5231/api/Recipe/delete/${idRecipe}`);
 
 
                     Swal.fire('Deleted!', 'The recipe has been deleted.', 'success');
-                    // navigate(`/contest/${id}`);
+                    navigate(`/contest/${id}`);
                 } catch (err) {
                     Swal.fire('Error!', 'Failed to delete the recipe.', 'error');
                 }

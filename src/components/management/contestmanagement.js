@@ -257,7 +257,7 @@ function ContestManagement() {
                                         {contest.price !== null && contest.price !== undefined ? contest.price.toFixed(2) : "N/A"}
                                     </td>
                                     <td style={{ cursor: "pointer", textAlign: "right" }} onClick={() => handleAttendeesDetail(contest.idContest)}>
-                                        <span>{attendeesCount[contest.idContest]}</span>
+                                        <span>{attendeesCount[contest.idContest] || 0}</span>
                                     </td>
                                     <td className={`status ${contest.status ? "active" : "inactive"}`} style={{ textAlign: "right" }}>
                                         {contest.status}
