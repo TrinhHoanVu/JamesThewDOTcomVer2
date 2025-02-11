@@ -84,7 +84,7 @@ function AttendeesDetail() {
         try {
             const response = await axios.get("http://localhost:5231/api/Recipe/getAllIngredient")
             setIngredientList(response.data.$values)
-            console.log(ingredientList)
+            // console.log(ingredientList)
         } catch (err) { console.log(err) }
     }
 
@@ -136,7 +136,7 @@ function AttendeesDetail() {
                     setTableCompare(false);
                 }
 
-                console.log(updatedComments);
+                // console.log(updatedComments);
             } catch (err) {
                 console.log(err);
             }
@@ -238,7 +238,86 @@ function AttendeesDetail() {
         }
     };
 
+    const handleRejectComments = async () => {
+        try {
+            const recipesToApprove = selectedComments.filter(recipe => !recipe.isApproved);
+            if (recipesToApprove.length === 0) {
+                Swal.fire({
+                    icon: "info",
+                    title: "No Action Needed",
+                    text: "No recipes need approval."
+                });
+                return;
+            }
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to reject the selected recipes and their ingredients?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, reject them!',
+                cancelButtonText: 'No, cancel'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
 
+                    let ingredientsToApprove = [];
+                    recipesToApprove.forEach(recipe => {
+                        recipe.recipeIngredients.$values.forEach(ingredientId => {
+                            const ingredient = ingredientList.find(i => i.idIngredient === ingredientId.ingredientID);
+                            if (ingredient && !ingredient.isApproved) {
+                                ingredientsToApprove.push(ingredient.idIngredient);
+                            }
+                        });
+                    });
+
+                    ingredientsToApprove = [...new Set(ingredientsToApprove)];
+                    console.log(ingredientsToApprove)
+                    console.log(recipesToApprove)
+
+                    if (ingredientsToApprove.length > 0)
+                        await axios.delete('http://localhost:5231/api/Recipe/DeleteUnapprovedIngredients', {
+                            data: ingredientsToApprove
+                        });
+
+                    await Promise.all(
+                        recipesToApprove.map(recipe => {
+                            axios.delete(`http://localhost:5231/api/Recipe/DeleteByRecipeId/${recipe.idRecipe}`)
+
+                            axios.delete(`http://localhost:5231/api/Recipe/deleteParticipant`, {
+                                params: {
+                                    idContest: contestId,
+                                    idAccount: recipe.idAccountPost
+                                }
+                            });
+                            axios.delete(`http://localhost:5231/api/Recipe/delete/${recipe.idRecipe}`);
+                        }))
+
+
+                    setAttendeesList(prevAttendeesList =>
+                        prevAttendeesList.filter(attendee =>
+                            !recipesToApprove.some(r => r.idRecipe === attendee.idRecipe)
+                        )
+                    );
+
+
+                    setIngredientList(prevIngredients =>
+                        prevIngredients.map(ingredient =>
+                            ingredientsToApprove.includes(ingredient.idIngredient)
+                                ? { ...ingredient, isApproved: true }
+                                : ingredient
+                        )
+                    );
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success",
+                        text: "Selected recipes and their ingredients have been rejected!"
+                    }).then(() => window.location.reload());
+                }
+            });
+        } catch (err) { console.log(err) }
+    }
 
     return (
         <div className="attendees-modal-overlay">
@@ -305,57 +384,11 @@ function AttendeesDetail() {
                     <button className="compare-button" onClick={handleApproveComments}>
                         Approve
                     </button>
+                    <button className="compare-button" onClick={handleRejectComments}>
+                        Reject
+                    </button>
                 </div>
                 <br /><br /><br />
-
-                {/* {tableCompare && (
-                    <div className="selected-comments-container" ref={compareTableRef}>
-                        <div style={{ textAlign: "center", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: "row", height: "30px" }}>
-                            <div style={{ textAlign: "center", width: "97%" }}>
-                                <h2>Selected Comments</h2>
-                            </div>
-                            <span style={{
-                                cursor: "pointer", width: "100px",
-                                background: "none", border: "none", fontSize: "15px"
-                            }}
-                                onClick={() => { handleSaveMark() }}>Save Mark</span>
-                        </div>
-                        <table className="selected-comments-table">
-                            <thead>
-                                <tr>
-                                    <th className="compare-name-column">Name</th>
-                                    <th className="comment-name-column">Comment</th>
-                                    <th className="likes-name-column">Likes</th>
-                                    <th className="evaluate-name-column">Mark</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {selectedComments.map((comment, index) => (
-                                    <tr key={index}>
-                                        <td>{comment.account.name}</td>
-                                        <td>{comment.content}</td>
-                                        <td style={{ textAlign: "left" }}>{comment.likes}</td>
-                                        <td>
-                                            <input type="number"
-                                                min="1"
-                                                className="evaluate-input"
-                                                max="10"
-                                                onInput={(e) => {
-                                                    if (e.target.value < 1) e.target.value = 1;
-                                                    if (e.target.value > 10) e.target.value = 10;
-                                                }}
-                                                onChange={(e) => { comment.mark = e.target.value }}
-                                            />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        <br /><br /><br />
-                    </div>
-                )}
- */}
-
             </div>
         </div >
     );
