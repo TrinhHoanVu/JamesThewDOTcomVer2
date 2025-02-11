@@ -7,7 +7,7 @@ const MealItem = ({ data }) => {
     let navigate = useNavigate();
     const storedToken = JSON.parse(localStorage.getItem("inforToken"));
     const user = jwtDecode(storedToken.token)
-    const userRole = user ? user.role : null;
+    const userRole = user ? user.role : null; 
     return (
         <>
             {

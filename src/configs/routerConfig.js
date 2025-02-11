@@ -89,7 +89,6 @@ const publicRouter = [
     }
 ]
 
-
 const privateRouter = [
     {
         path: "/management",

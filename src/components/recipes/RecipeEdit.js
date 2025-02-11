@@ -23,7 +23,7 @@ const RecipeEdit = () => {
         try {
             if (!isLoggedIn) {
                 navigate("/login"); // Nếu chưa đăng nhập, điều hướng đến trang đăng nhập
-            }
+            } 
             fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${idMeal}`)
                 .then((res) => res.json())
                 .then((data) => {
