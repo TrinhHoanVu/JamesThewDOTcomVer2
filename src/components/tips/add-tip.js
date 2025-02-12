@@ -80,26 +80,30 @@ function AddTip({ onClose, reloadTips, IsApproved, title = 'Add tip successfully
     };
 
     const validate = () => {
-        const errors = {};
+        try {
+            const errors = {};
 
-        if (!name.trim()) {
-            errors.name = "Name is required.";
-        } else if (tipNameList.includes(name)) {
-            errors.name = "This name is already taken.";
+            if (!name.trim()) {
+                errors.name = "Name is required.";
+            } else if (tipNameList.includes(name)) {
+                errors.name = "This name is already taken.";
+            }
+
+            if (!description.getCurrentContent().hasText()) {
+                errors.description = "Description is required.";
+            }
+
+            if (!selectedImage) {
+                errors.image = "Image is required.";
+            } else if (selectedImage.size > 5 * 1024 * 1024) {
+                errors.image = "Image size must be under 5MB.";
+            }
+
+            setErrors(errors);
+            return errors;
+        } catch (error) {
+            console.log(error)
         }
-
-        if (!description.getCurrentContent().hasText()) {
-            errors.description = "Description is required.";
-        }
-
-        if (!selectedImage) {
-            errors.image = "Image is required.";
-        } else if (selectedImage.size > 5 * 1024 * 1024) {
-            errors.image = "Image size must be under 5MB.";
-        }
-
-        setErrors(errors);
-        return errors;
     };
 
 
