@@ -1,44 +1,60 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 const MealItem = ({ data }) => {
-    console.log(data);
-    const [userRole, seUserRole] = useState();
-    let navigate = useNavigate();
+    const [userRole, setUserRole] = useState("");
+    const navigate = useNavigate();
 
-    try {
+    useEffect(() => {
+        try {
+            const storedToken = localStorage.getItem("inforToken");
+            if (storedToken) {
+                const parsedToken = JSON.parse(storedToken);
+                const user = jwtDecode(parsedToken.token);
+                setUserRole(user?.role || "");
+            }
+        } catch (error) {
+            console.log("Token parsing error:", error);
+            setUserRole("");
+        }
+    }, []); // Empty dependency array means this only runs once on mount
 
-        const storedToken = JSON.parse(localStorage.getItem("inforToken"));
-        const user = jwtDecode(storedToken.token)
-        seUserRole(user ? user.role : "");
-    } catch (er) { console.log(er) }
+    const handleEditClick = (e, mealId) => {
+        e.stopPropagation();
+        navigate(`/recipe-edit/${mealId}`);
+    };
+
+    if (!data) {
+        return <div>Not Found</div>;
+    }
+
     return (
         <>
-            {
-                (!data) ? "Not Found" : data.map(item => {
-                    return (
-                        <div className="card" key={item.idMeal} onClick={() => navigate(`/recipe/${item.idMeal}`)}>
-                            <img src={item.strMealThumb} alt="" />
-                            <h3>{item.strMeal}</h3>
-                            {/* {console.log(user)} */}
-                            {userRole === "SUPERADMIN" && (
-                                <button
-                                    className="edit-btn"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigate(`/recipe-edit/${item.idMeal}`);
-                                    }}
-                                >
-                                    Edit Recipe
-                                </button>
-                            )}
-                        </div>
-                    )
-                })
-            }
-
+            {data.map(item => (
+                <div 
+                    className="card" 
+                    key={item.idMeal} 
+                    onClick={() => navigate(`/recipe/${item.idMeal}`)}
+                >
+                    <img 
+                        src={item.strMealThumb} 
+                        alt={item.strMeal} 
+                    />
+                    <h3>{item.strMeal}</h3>
+                    
+                    {userRole === "SUPERADMIN" && (
+                        <button
+                            className="edit-btn"
+                            onClick={(e) => handleEditClick(e, item.idMeal)}
+                        >
+                            Edit Recipe
+                        </button>
+                    )}
+                </div>
+            ))}
         </>
-    )
-}
+    );
+};
+
 export default MealItem;

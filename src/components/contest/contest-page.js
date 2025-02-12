@@ -81,7 +81,7 @@ const ContestPage = () => {
                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "10px" }}>
                                 <input
                                     type="text"
-                                    placeholder="Search tips..."
+                                    placeholder="Search contests..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="search-input"

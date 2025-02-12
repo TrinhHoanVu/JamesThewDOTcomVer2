@@ -47,19 +47,22 @@ function TipDetail() {
         }
     };
 
+    const handleSetPayment = () => {
+        setPayment(true)
+    }
+
     if (!tip) return <NotFoundPage />;
 
     const isPublic = tip?.isPublic;
     const isMember = user?.status;
     const userRole = user?.role;
-
     // Nếu nội dung riêng tư và người dùng không phải thành viên -> Chặn hiển thị
     if (!isPublic && userRole === "USER" && !isMember) {
         return (
-            <div className="contestdt-container center-text">
+            <div className="contestdt-container center-text" style={{ marginTop: "60px" }}>
                 <p>
                     This page is for members only. You need to register to view the content. <br />
-                    Click <span style={{ color: "orange", cursor: "pointer" }} onClick={() => setPayment(true)}>here</span> to register.
+                    Click <span style={{ color: "orange", cursor: "pointer" }} onClick={() => handleSetPayment()}>here</span> to register.
                 </p>
                 {payment && (
                     <div className="payment-overlay">
@@ -107,5 +110,5 @@ function TipDetail() {
         </div>
     );
 }
- 
+
 export default TipDetail;
