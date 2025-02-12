@@ -365,7 +365,15 @@ function Evaluation() {
                                                 if (e.target.value < 1) e.target.value = 1;
                                                 if (e.target.value > 10) e.target.value = 10;
                                             }}
-                                            onChange={(e) => { attendee.mark = e.target.value }} />
+                                            onChange={(e) => {
+                                                const newValue = e.target.value;
+                                                setAttendeesList((prevList) =>
+                                                    prevList.map((item, idx) =>
+                                                        idx === index ? { ...item, mark: newValue } : item
+                                                    )
+                                                );
+                                            }}
+                                        />
                                     </td>
                                 </tr>
                             ))

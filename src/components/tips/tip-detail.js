@@ -10,27 +10,27 @@ import Swal from 'sweetalert2';
 function TipDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [tip, setTip] = useState(null);
-    const [description, setDescription] = useState("");
-    const [user, setUser] = useState(null);
-    const { tokenInfor } = useContext(DataContext);
-    const [payment, setPayment] = useState(false);
     const location = useLocation();
+    const { tokenInfor } = useContext(DataContext);
+
+    const [tip, setTip] = useState(null);
+    const [user, setUser] = useState(null);
+    const [payment, setPayment] = useState(false);
 
     useEffect(() => {
-        if (id) {
-            fetchTip();
-            fetchUser();
-        } else {
-            console.error("Invalid tip ID.");
-        }
+        if (id) fetchTip();
+        else console.error("Invalid tip ID.");
     }, [id]);
+
+    useEffect(() => {
+        if (tokenInfor?.email) fetchUser();
+        else navigate("/login", { state: { from: location.pathname } }); // Chặn người chưa đăng nhập
+    }, [tokenInfor]);
 
     const fetchTip = async () => {
         try {
-            const response = await axios.get("http://localhost:5231/api/Tips/getSpecificTip", { params: { idTip: id } });
+            const response = await axios.get(`http://localhost:5231/api/Tips/getSpecificTip?idTip=${id}`);
             setTip(response.data);
-            setDescription(response.data.decription);
         } catch (err) {
             console.log("Tip not found");
             setTip(null);
@@ -40,100 +40,32 @@ function TipDetail() {
     const fetchUser = async () => {
         try {
             const response = await axios.get(`http://localhost:5231/api/Account/${tokenInfor.email}`);
-            if (response) {
-                setUser(response.data);
-            }
+            setUser(response.data);
         } catch (error) {
             console.log(error);
-            // showLoginAlert();
+            navigate("/login", { state: { from: location.pathname } }); // Chặn người chưa đăng nhập
         }
     };
 
-    const showLoginAlert = () => {
-        Swal.fire({
-            title: "You are not logged in",
-            text: "You need to log in to view this content.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes",
-            cancelButtonText: "No"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                navigate("/login", { state: { from: location.pathname } });
-            }
-        });
-    };
+    if (!tip) return <NotFoundPage />;
 
-    const renderDescription = (description) => {
-        if (typeof description === 'string') {
-            return description.split("\\n").map((item, key) =>
-                <span key={key}>{item}<br /></span>
-            );
-        }
-        return "";
-    };
-
-    const handlePayment = () => {
-        setPayment(true);
-        console.log(payment)
-    };
-
-    const handleBackToTipPage = () => {
-        navigate("/tips")
-    }
-
-    if (!tip) {
-        return <NotFoundPage />;
-    }
-
-    const userRole = user?.role;
     const isPublic = tip?.isPublic;
+    const isMember = user?.status;
+    const userRole = user?.role;
 
-    const navigateToLogin = () => {
-        try {
-            navigate(".login")
-        } catch (err) { console.log(err) }
-    }
-
-    if (isPublic) {
-        return (
-            <div className="contestdt-container">
-                <div className="contestdt-details">
-                    <img src={tip.images} alt={tip.name} className="contestdt-image" />
-                    <h1 className="contestdt-title">{tip.name}</h1>
-                    <div className="contestdt-info">
-                        <p className="contestdt-description">{renderDescription(description)}</p>
-                        <span>Posted by: {tip.account.name}</span>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (!user) {
-        return (
-            <div className="contestdt-container center-text">
-                <p>
-                    This content is private. Please <span style={{ color: "orange", cursor: "pointer" }} onClick={navigateToLogin}>log in</span> to continue.
-                </p>
-            </div>
-        );
-    }
-
-    if (!user?.status) {
+    // Nếu nội dung riêng tư và người dùng không phải thành viên -> Chặn hiển thị
+    if (!isPublic && userRole === "USER" && !isMember) {
         return (
             <div className="contestdt-container center-text">
                 <p>
                     This page is for members only. You need to register to view the content. <br />
-                    Click <span style={{ color: "orange", cursor: "pointer" }} onClick={handlePayment}>here</span> to register.
+                    Click <span style={{ color: "orange", cursor: "pointer" }} onClick={() => setPayment(true)}>here</span> to register.
                 </p>
-
                 {payment && (
-                    <div>
-                        <div className="overlay"></div>
-                        <div className="cmtForm-payment-box">
-                            <button className="cmtForm-close-button" onClick={handleBackToTipPage}>✖</button>
-                            <h4 className="cmtForm-message">Your account is not active. Please subscribe to view the content.</h4>
+                    <div className="payment-overlay">
+                        <div className="payment-box">
+                            <button className="close-button" onClick={() => setPayment(false)}>✖</button>
+                            <h4 className="payment-message">Your account is not active. Please subscribe to access this content.</h4>
                             <PaymentForm user={user} />
                         </div>
                     </div>
@@ -143,18 +75,37 @@ function TipDetail() {
     }
 
     return (
-        <div className="contestdt-container">
-            <div className="contestdt-details">
-                <img src={tip.images} alt={tip.name} className="contestdt-image" />
-                <h1 className="contestdt-title">{tip.name}</h1>
-                <div className="contestdt-info">
-                    <p className="contestdt-description">{renderDescription(description)}</p>
-                    <span>Posted by: {tip.account.name}</span>
+        <div className="tip-detail-container">
+            <button className="back-button" style={{ color: "white", background: "#d15834", marginTop: "100px" }} onClick={() => navigate("/tips")}>
+                Back
+            </button>
+
+            <div className="tip-detail-content">
+                <div className="tip-detail-image-container">
+                    {tip.images ? (
+                        <img
+                            src={`http://localhost:5231${tip.images}`}
+                            alt={tip.name}
+                            className="tip-detail-image"
+                            onError={(e) => (e.target.src = "/images/default.jpg")}
+                        />
+                    ) : (
+                        <div className="tip-detail-no-image">No Image Available</div>
+                    )}
+                </div>
+
+                <div className="tip-detail-body">
+                    <h1 className="tip-detail-title">{tip.name}</h1>
+                    <div className="tip-detail-info">
+                        <div className="tip-detail-description">
+                            {tip.decription.split("\n").map((item, key) => <p key={key}>{item}</p>)}
+                        </div>
+                        <div className="tip-detail-author">Posted by: {tip.account?.name || "Unknown"}</div>
+                    </div>
                 </div>
             </div>
         </div>
     );
-
 }
-
+ 
 export default TipDetail;
