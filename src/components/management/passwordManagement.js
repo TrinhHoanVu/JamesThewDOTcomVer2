@@ -173,7 +173,8 @@ function PasswordManagement() {
                                 cursor: "pointer",
                                 display: "flex",
                                 alignItems: "center"
-                            }}>
+                            }}
+                            onClick={() => togglePasswordVisibility("new")}>                            
                             {showPassword.new ? <EyeOff /> : <Eye />}
                         </span>
                     </div>
