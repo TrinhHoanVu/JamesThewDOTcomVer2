@@ -190,7 +190,7 @@ function AddTip({ onClose, reloadTips, IsApproved, title = 'Add tip successfully
                     {errors.name && <span style={{ color: "red", fontSize: "14px" }}>{errors.name}</span>}
                 </div>
 
-                <div style={{ marginBottom: "20px" }}>
+                {/* <div style={{ marginBottom: "20px" }}>
                     <label>Status:</label>
                     <select
                         value={isPublic ? "true" : "false"}
@@ -206,7 +206,7 @@ function AddTip({ onClose, reloadTips, IsApproved, title = 'Add tip successfully
                         <option value="true">Public</option>
                         <option value="false">Private</option>
                     </select>
-                </div>
+                </div> */}
 
                 <div style={{ marginBottom: "20px" }}>
                     <label>Description: {errors.description && <span style={{ color: "red", fontSize: "14px" }}>{errors.description}</span>}</label>

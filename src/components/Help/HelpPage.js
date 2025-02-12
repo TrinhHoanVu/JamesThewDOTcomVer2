@@ -36,7 +36,7 @@ const FeedbackForm = () => {
     event.preventDefault();
     const subject = "User Feedback";
     const body = `Name: ${name}\n\nMessage: ${message}`;
-    const mailtoLink = `mailto:htaicode@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoLink = `mailto:llstylishv2@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
   };
 

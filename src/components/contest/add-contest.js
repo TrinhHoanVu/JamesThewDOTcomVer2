@@ -132,7 +132,7 @@ function AddContest({ onClose, reloadContests }) {
             if (!name.trim()) errors.name = "Name is required.";
             if (contestNameList.includes(name)) errors.name = "This name has already been taken.";
             if (!description.getCurrentContent().hasText()) errors.description = "Description is required.";
-            if (price < 0) errors.price = "Price must be greater than or equal to 0.";
+            if (price <= 0) errors.price = "Price must be greater than or equal to 0.";
             if (!startDate) errors.startDate = "Start date is required.";
             if (!endDate) errors.endDate = "End date is required.";
 
@@ -140,7 +140,7 @@ function AddContest({ onClose, reloadContests }) {
             const end = new Date(endDate).getTime();
             const now = Date.now();
 
-            if (start < now) errors.startDate = "Start date must be in the future.";
+            if (start <= now) errors.startDate = "Start date must be in the future.";
             if (end < now) errors.endDate = "End date must be in the future.";
             if (start >= end) errors.endDate = "End date must be after the start date.";
         } catch (err) { console.log(err) }
