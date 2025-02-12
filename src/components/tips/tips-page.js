@@ -221,7 +221,7 @@ const TipCard = ({ tip }) => {
                 {tip.decription?.length > maxLength && (
                     <span className="tip-card-readmore">
                         More Detail
-                    </span>
+                    </span> 
                 )}
             </p>
             <span className={`tip-status ${tip.isPublic ? 'tip-status-public' : 'tip-status-private'}`}>
