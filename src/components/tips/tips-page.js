@@ -66,13 +66,17 @@ const TipsPage = () => {
         });
     };
 
-    const createOwnTip = () => {
+    const createOwnTip = async () => {
         try {
-            fetchUser()
-            if (user)
-                setAddTipTable(true)
-        } catch (err) { console.log(err) }
-    }
+            await fetchUser(); // Kiểm tra đăng nhập trước khi mở modal
+            if (user) {
+                setAddTipTable(true);
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    };
+    
 
     const handleViewDetails = (tipId) => {
         try {
@@ -98,7 +102,8 @@ const TipsPage = () => {
     };
 
     const filteredTips = tips.filter((tip) =>
-        tip.name.toLowerCase().includes(searchQuery.toLowerCase())
+        tip.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (tip.decription && tip.decription.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     const handleClearSearch = () => {
@@ -106,104 +111,124 @@ const TipsPage = () => {
     }
 
     return (
-        <div style={{ maxHeight: "700px", width: "100%" }}>
-            <div>
-                <img src="/images/contestbanner.jpg" alt="" className="contestdt-image" />
-                <h1 className="tip-title"> COOKING TIPS</h1>
+        <div className="tips-page-container">
+            {/* Banner Section */}
+            <div className="tips-banner">
+                <img
+                    src="/images/contestbanner.jpg"
+                    alt="Cooking Tips Banner"
+                    className="tips-banner-image"
+                />
+                <h1 className="tips-title">COOKING TIPS</h1>
             </div>
-            <div className="contest-container">
-                <div style={{ width: "500px", margin: "0 auto" }}>
-                    <div style={{
-                        display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "500px"
-                    }}>
-                        <button className="compare-button-2" onClick={() => createOwnTip()}>
-                            Create Your Tips
-                        </button>
-                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "10px" }}>
-                            <input
-                                type="text"
-                                placeholder="Search tips..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="search-input"
-                                style={{ width: "150px", height: "30px" }}
-                            />
-                            {searchQuery && <FaTimes
-                                style={{ fontSize: "25px", cursor: "pointer", borderRadius: "50%", border: "1px black" }}
-                                onClick={() => handleClearSearch()} />}
-                        </div>
-                    </div>
-                </div>
-                <br /><br />
-                <div className="contest-list">
-                    {filteredTips.length > 0 ? (
-                        filteredTips.map((tip, index) => (
-                            <TipCard key={tip.idTip || `tip-${index}`} tip={tip} onViewDetails={handleViewDetails} />
-                        ))
-                    ) : (
-                        <p>No Tips available.</p>
-                    )}
-                </div>
 
-                {total > pageSize && (
-                    <div className="contest-pagination">
-                        <button className="contest-pagination-button" onClick={handlePreviousPage} disabled={pageNumber === 1}>
-                            Previous
-                        </button>
-                        <span className="contest-pagination-text">
-                            Page {pageNumber} of {Math.ceil(total / pageSize)}
-                        </span>
-                        <button
-                            className="contest-pagination-button"
-                            onClick={handleNextPage}
-                            disabled={(pageNumber - 1) * pageSize + tips.length >= total}
-                        >
-                            Next
-                        </button>
+            {/* Controls Section */}
+            <div className="tips-controls">
+                <div className="tips-controls-inner">
+                    <button className="create-tip-button" onClick={createOwnTip}>
+                        Create Your Own Tips
+                    </button>
+                    <div className="search-container">
+                        <input
+                            type="text"
+                            placeholder="Search tips..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="search-input"
+                        />
+                        {searchQuery && (
+                            <FaTimes
+                                className="search-clear"
+                                onClick={handleClearSearch}
+                            />
+                        )}
                     </div>
-                )}
-                {addTipTable && (
-                    <div className="edit-modal-overlay">
-                        <div className="edit-modal">
-                            <AddTip isUser={true} onClose={() => setAddTipTable(false)} IsApproved={false} title="Add tip successfully! Please wait for approving!" />
-                            <button className="close-modal-button" onClick={() => setAddTipTable(false)}>
-                                Close
-                            </button>
-                        </div>
-                    </div>
+                </div>
+            </div>
+
+            {/* Tips Grid */}
+            <div className="tips-grid">
+                {filteredTips.length > 0 ? (
+                    filteredTips.map((tip, index) => (
+                        <TipCard
+                            key={tip.idTip || `tip-${index}`}
+                            tip={tip}
+                            onViewDetails={handleViewDetails}
+                        />
+                    ))
+                ) : (
+                    <p className="no-tips-message">No Tips available.</p>
                 )}
             </div>
+
+            {/* Pagination */}
+            {total > pageSize && (
+                <div className="tips-pagination">
+                    <button
+                        className="pagination-button"
+                        onClick={handlePreviousPage}
+                        disabled={pageNumber === 1}
+                    >
+                        Previous
+                    </button>
+                    <span className="pagination-text">
+                        Page {pageNumber} of {Math.ceil(total / pageSize)}
+                    </span>
+                    <button
+                        className="pagination-button"
+                        onClick={handleNextPage}
+                        disabled={(pageNumber - 1) * pageSize + tips.length >= total}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
+
+            {/* Add Tip Modal */}
+            {addTipTable && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <button className="modal-close-button" onClick={() => setAddTipTable(false)}>✖</button>
+                        <h2 className="modal-title">Create Your Tip</h2>
+                        <AddTip
+                            onClose={() => setAddTipTable(false)}
+                            IsApproved={false}
+                            title="Add tip successfully! Please wait for approval!"
+                        />
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };
 
-const TipCard = ({ tip, onViewDetails }) => {
-    try {
-        const navigate = useNavigate();
-        const maxLength = 100;
+const TipCard = ({ tip }) => {
+    const navigate = useNavigate();
+    const maxLength = 100;
 
-        const handleReadMore = () => {
-            navigate(`/tips/${tip.idTip}`);
-        };
-        return (
-            <div className="contest-card" onClick={() => handleReadMore()}>
-                <h3 className="contest-card-title">{tip.name}</h3>
-                <p className="contest-card-description">
-                    {tip.decription.length > maxLength
-                        ? `${tip.decription.substring(0, maxLength)}...`
-                        : tip.decription}
-                    {tip.decription.length > maxLength && (
-                        <span className="contest-card-readmore" onClick={handleReadMore}>
-                            More Detail
-                        </span>
-                    )}
-                </p>
-                <span className={`contest-status contest-status-public`}>
-                    {tip.isPublic ? "Public" : "Private"}
-                </span>
-            </div>
-        );
-    } catch (err) { console.log(err) }
+    const handleReadMore = () => {
+        navigate(`/tips/${tip.idTip}`);
+    };
+
+    return (
+        <div className="tip-card" onClick={handleReadMore}>
+            <h3 className="tip-card-title">{tip.name}</h3>
+            <p className="tip-card-description">
+                {tip.decription?.length > maxLength
+                    ? `${tip.decription.substring(0, maxLength)}...`
+                    : tip.decription}
+                {tip.decription?.length > maxLength && (
+                    <span className="tip-card-readmore">
+                        More Detail
+                    </span>
+                )}
+            </p>
+            <span className={`tip-status ${tip.isPublic ? 'tip-status-public' : 'tip-status-private'}`}>
+                {tip.isPublic ? "Public" : "Private"}
+            </span>
+        </div>
+    );
 };
 
 export default TipsPage;
