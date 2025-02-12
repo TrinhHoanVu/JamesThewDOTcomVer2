@@ -107,5 +107,5 @@ function TipDetail() {
         </div>
     );
 }
-
+ 
 export default TipDetail;
